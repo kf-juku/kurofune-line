@@ -86,6 +86,18 @@ header .sub { font-size: 12px; opacity: 0.85; }
 .tag-edit { margin-top: 8px; padding: 8px; background: #F7FAF8; border: 1px solid #E0EFE8; border-radius: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
 .tag-edit-label { width: 100%; font-size: 11px; color: var(--gray); font-weight: 600; margin-bottom: 2px; }
 .tag-sel { font-size: 12px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; background: white; max-width: 48%; }
+.src-line { background:#D3D1C7; color:#2C2C2A; }
+.src-self { background:#FAEEDA; color:#854F0B; }
+.src-mem  { background:#E1F5EE; color:#0F6E56; }
+.src-tag { font-size:10px; border-radius:4px; padding:1px 6px; }
+.info-box { border-radius:8px; padding:8px; margin-top:6px; }
+.info-box.self { background:#FFFBF3; border:0.5px solid #FAEEDA; }
+.info-box.mem  { background:#F2FBF7; border:0.5px solid #E1F5EE; }
+.info-box-head { font-size:10px; margin-bottom:5px; }
+.info-box-head.self { color:#854F0B; }
+.info-box-head.mem  { color:#0F6E56; }
+.src-pill { font-size:11px; border-radius:4px; padding:2px 7px; }
+.line-foot { font-size:10px; color:var(--gray); margin-top:6px; }
 .badge {
   font-size: 11px; padding: 1px 7px; border-radius: 6px; font-weight: 600;
   background: var(--surface2); color: var(--text-muted);
@@ -297,6 +309,12 @@ function selectedFriend(){
   return STATE.friends.filter(function(f){ return f.userId === STATE.selectedUserId; })[0] || null;
 }
 
+function memberById_(id){
+  if (!id) return null;
+  var hit = (STATE.members||[]).filter(function(m){ return String(m.id)===String(id); });
+  return hit.length ? hit[0] : null;
+}
+
 function renderFriends(){
   var el = $('friendList');
   $('friendCount').textContent = STATE.friends.length;
@@ -309,12 +327,49 @@ function renderFriends(){
     var kindBadge = fr.kind ? '<span class="badge kind">'+esc(fr.kind)+'</span>' : '';
     var sendTip = 'これは「遅刻などの自動通知」を送ってよいかの許可です。一斉配信とは別で、一斉配信はこの設定に関係なく届きます。';
     var onBadge = (fr.sendOn ? '<span class="badge on">自動通知ON' : '<span class="badge off">自動通知OFF') + '<span class="help-chip" data-tip="'+sendTip+'">?</span></span>';
-    var linkBadge = linked ? '<span class="badge on">紐づけ済 '+esc(fr.studentId)+'</span>' : '<span class="badge strong">未紐づけ</span>';
-    var infoBadge = '';
-    if (fr.inName) infoBadge += '<span class="badge">入力名 '+esc(fr.inName)+'</span>';
-    if (fr.grade) infoBadge += '<span class="badge">'+esc(fr.grade)+'</span>';
-    if (!linked && !sel) infoBadge += '<span class="badge" style="background:#E6F1FB;color:#185fa5;">クリックで候補</span>';
+    var mem = linked ? memberById_(fr.studentId) : null;
     var busy = (STATE._busy === fr.userId);
+
+    // カード名＋出どころタグ：紐づけ済みは会員名(+会員タグ)、未紐づけはLINE名(+LINE名タグ)。
+    var titleName, srcTag, linkBadge;
+    if (linked && mem) {
+      titleName = esc(mem.name||'(会員名なし)');
+      srcTag = '<span class="src-tag src-mem">会員</span>';
+      linkBadge = '<span class="badge on">紐づけ済</span>';
+    } else if (linked) {
+      titleName = esc(fr.name||'(表示名なし)');
+      srcTag = '<span class="src-tag src-line">LINE名</span>';
+      linkBadge = '<span class="badge" style="background:#FCEBEB;color:#A32D2D;">会員情報なし('+esc(fr.studentId)+')</span>';
+    } else {
+      titleName = esc(fr.name||'(表示名なし)');
+      srcTag = '<span class="src-tag src-line">LINE名</span>';
+      linkBadge = '<span class="badge strong">未紐づけ</span>';
+    }
+
+    // 情報枠：紐づけ済み＝会員管理(緑)、未紐づけ＝本人入力(オレンジ)。
+    var infoBox = '';
+    if (linked && mem) {
+      var memPills = '';
+      if (mem.grade)     memPills += '<span class="src-pill src-mem">'+esc(mem.grade)+'</span>';
+      if (mem.classroom) memPills += '<span class="src-pill src-mem">'+esc(mem.classroom)+'</span>';
+      if (mem.status)    memPills += '<span class="src-pill src-mem">'+esc(mem.status)+'</span>';
+      infoBox = '<div class="info-box mem"><div class="info-box-head mem">🎓 会員管理の情報（正式）</div>'
+              + '<div style="display:flex;flex-wrap:wrap;gap:4px;">'+(memPills||'<span class="line-foot">情報なし</span>')+'</div></div>'
+              + '<div class="line-foot"><span class="src-tag src-line">LINE名: '+esc(fr.name||'')+'</span>　会員管理が正＝ここでは編集不可</div>';
+    } else if (!linked) {
+      var selfPills = '';
+      if (fr.inName) selfPills += '<span class="src-pill src-self">入力名 '+esc(fr.inName)+'</span>';
+      if (fr.kind)   selfPills += '<span class="src-pill src-self">'+esc(fr.kind)+'</span>';
+      if (fr.grade)  selfPills += '<span class="src-pill src-self">'+esc(fr.grade)+'</span>';
+      if (fr.course) selfPills += '<span class="src-pill src-self">'+esc(fr.course)+'</span>';
+      if (fr.room)   selfPills += '<span class="src-pill src-self">'+esc(fr.room)+'</span>';
+      if (fr.memo)   selfPills += '<span class="src-pill src-self">'+esc(fr.memo)+'</span>';
+      if (selfPills) {
+        infoBox = '<div class="info-box self"><div class="info-box-head self">✏️ 本人がアンケートで入力した内容</div>'
+                + '<div style="display:flex;flex-wrap:wrap;gap:4px;">'+selfPills+'</div></div>';
+      }
+    }
+
     var actions = '<div class="card-actions">'
       + (busy
           ? '<button class="btn gray small" disabled style="opacity:.6">処理中…</button>'
@@ -322,11 +377,12 @@ function renderFriends(){
             + (fr.sendOn?'送信OFFにする':'送信ONにする') + '</button>')
       + (linked && !busy ? '<button class="btn gray small" onclick="event.stopPropagation();unlink(\''+esc(fr.userId)+'\')">紐づけ解除</button>' : '')
       + '</div>';
-    // 未紐づけ（見込み客）はタグをインライン編集できる。紐づけ済みは会員管理が正＝編集不可（バッジ表示のみ）。
+    // 未紐づけ（見込み客）はタグをインライン編集できる。紐づけ済みは会員管理が正＝編集不可。
     var tagEditor = linked ? '' : tagEditorHtml_(fr);
     return '<div class="'+cls+'" onclick="selectFriend(\''+esc(fr.userId)+'\')">'
-      + '<div class="card-top"><div class="card-title">'+esc(fr.name||'(表示名なし)')+'</div></div>'
-      + '<div class="card-meta">'+kindBadge+linkBadge+onBadge+infoBadge+'</div>'
+      + '<div class="card-top"><div class="card-title">'+titleName+' '+srcTag+'</div></div>'
+      + '<div class="card-meta">'+kindBadge+linkBadge+onBadge+'</div>'
+      + infoBox
       + tagEditor
       + actions
       + '</div>';
