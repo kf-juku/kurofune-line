@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
-<title>Kurofune-LINE 紐づけ管理</title>
+<title>Kurofune-LINE アカウント管理</title>
 <style>
 :root {
   /* LINEグリーンをアクセントに（2026-06-25 川上さん指示）。変数名は据え置きで値だけ差し替え */
@@ -83,6 +83,9 @@ header .sub { font-size: 12px; opacity: 0.85; }
 .card-title { font-size: 13px; font-weight: 600; flex: 1; }
 .card-meta { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .card-actions { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+.tag-edit { margin-top: 8px; padding: 8px; background: #F7FAF8; border: 1px solid #E0EFE8; border-radius: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+.tag-edit-label { width: 100%; font-size: 11px; color: var(--gray); font-weight: 600; margin-bottom: 2px; }
+.tag-sel { font-size: 12px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; background: white; max-width: 48%; }
 .badge {
   font-size: 11px; padding: 1px 7px; border-radius: 6px; font-weight: 600;
   background: var(--surface2); color: var(--text-muted);
@@ -149,7 +152,7 @@ header .sub { font-size: 12px; opacity: 0.85; }
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" id="tabBtnLink" onclick="switchTab('link')">🔗 紐づけ</button>
+    <button class="tab-btn active" id="tabBtnLink" onclick="switchTab('link')">👥 アカウント管理</button>
     <button class="tab-btn" id="tabBtnCast" onclick="switchTab('cast')">📣 一斉配信</button>
   </div>
 
@@ -319,12 +322,66 @@ function renderFriends(){
             + (fr.sendOn?'送信OFFにする':'送信ONにする') + '</button>')
       + (linked && !busy ? '<button class="btn gray small" onclick="event.stopPropagation();unlink(\''+esc(fr.userId)+'\')">紐づけ解除</button>' : '')
       + '</div>';
+    // 未紐づけ（見込み客）はタグをインライン編集できる。紐づけ済みは会員管理が正＝編集不可（バッジ表示のみ）。
+    var tagEditor = linked ? '' : tagEditorHtml_(fr);
     return '<div class="'+cls+'" onclick="selectFriend(\''+esc(fr.userId)+'\')">'
       + '<div class="card-top"><div class="card-title">'+esc(fr.name||'(表示名なし)')+'</div></div>'
       + '<div class="card-meta">'+kindBadge+linkBadge+onBadge+infoBadge+'</div>'
+      + tagEditor
       + actions
       + '</div>';
   }).join('');
+}
+
+// 未紐づけ友だちのタグ・インライン編集UI（見込み客のみ）。各selectを変えると即保存。
+// onclick/onchange に event.stopPropagation() を必ず付け、カード選択の暴発を防ぐ。
+function tagEditorHtml_(fr){
+  var uid = esc(fr.userId);
+  function sel_(field, label, opts, cur){
+    var o = '<option value="">'+label+'：未設定</option>';
+    opts.forEach(function(v){
+      o += '<option value="'+esc(v)+'"'+(String(cur)===v?' selected':'')+'>'+esc(v)+'</option>';
+    });
+    return '<select class="tag-sel" onclick="event.stopPropagation()" '
+         + 'onchange="event.stopPropagation();saveTag(\''+uid+'\',\''+field+'\',this.value)">'+o+'</select>';
+  }
+  var gradeOpts = gradeOptsForLevel_(fr.level);
+  return '<div class="tag-edit" onclick="event.stopPropagation()">'
+    + '<div class="tag-edit-label">タグ編集（見込み客）</div>'
+    + sel_('kind','種別',['保護者','生徒'],fr.kind)
+    + sel_('enroll','入会',['入会している','入会していない'],fr.memo)
+    + sel_('level','区分',['小学生','中学生','高校生'],fr.level)
+    + sel_('grade','学年',gradeOpts,fr.grade)
+    + sel_('course','コース',['進学塾クロフネ','コードアドベンチャー','両方'],fr.course)
+    + sel_('room','教室',['北久里浜教室','京急久里浜駅前教室'],fr.room)
+    + '</div>';
+}
+
+// 学校区分に応じた学年フルネーム選択肢（編集UI用・保存値もフルネーム）。
+function gradeOptsForLevel_(level){
+  if (level === '小学生') return ['小学1年生','小学2年生','小学3年生','小学4年生','小学5年生','小学6年生'];
+  if (level === '中学生') return ['中学1年生','中学2年生','中学3年生'];
+  if (level === '高校生') return ['高校1年生','高校2年生','高校3年生'];
+  return [];
+}
+
+// タグ1項目を保存（updateFriendTags）。保存後にSTATEを更新して再描画。
+function saveTag(userId, field, value){
+  var extra = { userId: userId };
+  extra[field] = value;
+  // 区分(level)を変えたら学年は不整合になりうるのでクリアする（保存後に選び直してもらう）。
+  if (field === 'level') extra.grade = '';
+  setStatus('タグ保存中…');
+  callGas('updateFriendTags', extra).then(function(res){
+    if (!res || !res.ok) { setStatus(''); alert('タグ保存エラー: '+((res&&res.error)||'不明')); return; }
+    var fr = STATE.friends.filter(function(f){ return f.userId===userId; })[0];
+    if (fr){
+      if (field==='enroll') fr.memo = value; else fr[field] = value;
+      if (field==='level') fr.grade = '';
+    }
+    setStatus('タグを保存しました（'+new Date().toLocaleTimeString()+'）');
+    renderFriends();
+  }).catch(function(e){ setStatus(''); alert('タグ保存エラー: '+e.message); });
 }
 
 // 学年表記の正規化：'小学2年生'→'小2'、'中3'→'中3' など短縮形にそろえる
