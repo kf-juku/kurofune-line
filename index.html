@@ -135,7 +135,10 @@ header .sub { font-size: 12px; opacity: 0.85; }
 .cast-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; }
 .cast-left, .cast-right { background:white; border:1px solid var(--border); border-radius:10px; padding:14px; }
 .cast-hist { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-@media (max-width:720px){ .cast-grid{grid-template-columns:1fr;} .cast-hist{grid-template-columns:1fr;} .cols{flex-direction:column;} }
+/* 予約中と配信履歴を左右2列に（2026-06-29） */
+.cast-bottom { display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; }
+.cast-bottom .cast-hist { grid-template-columns:1fr; } /* 各列内は1列で縦並び */
+@media (max-width:720px){ .cast-grid{grid-template-columns:1fr;} .cast-hist{grid-template-columns:1fr;} .cols{flex-direction:column;} .cast-bottom{grid-template-columns:1fr;} }
 
 /* ===== アカウント管理 コンパクト一覧（2026-06-29 モック準拠で作り直し）===== */
 /* サブタブ（未紐づけ/紐づけ済み/過去生） */
@@ -376,19 +379,25 @@ header .sub { font-size: 12px; opacity: 0.85; }
       </div>
     </div>
 
-    <div style="border-top:1px solid var(--border); margin-top:14px; padding-top:12px;">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-        <h2 style="font-size:14px; margin:0;">⏰ 予約中の配信</h2>
-        <button class="btn gray small" onclick="loadReservations()">更新</button>
+    <!-- 予約中と配信履歴を左右2列に並べる（2026-06-29）。スマホでは1列に折り返す。 -->
+    <div class="cast-bottom" style="border-top:1px solid var(--border); margin-top:14px; padding-top:12px;">
+      <div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <h2 style="font-size:14px; margin:0;">⏰ 予約中の配信</h2>
+          <button class="btn gray small" onclick="loadReservations()">更新</button>
+        </div>
+        <div id="reserveList" class="cast-hist"></div>
       </div>
-      <div id="reserveList" class="cast-hist"></div>
-    </div>
-    <div style="border-top:1px solid var(--border); margin-top:14px; padding-top:12px;">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-        <h2 style="font-size:14px; margin:0;">🕘 配信履歴</h2>
-        <button class="btn gray small" onclick="loadCastHistory()">更新</button>
+      <div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <h2 style="font-size:14px; margin:0;">🕘 配信履歴</h2>
+          <button class="btn gray small" onclick="loadCastHistory()">更新</button>
+        </div>
+        <div id="castHistory" class="cast-hist"></div>
+        <!-- 残りの履歴（折りたたみ）と開閉ボタンはJSで描画 -->
+        <div id="castHistoryMore" style="display:none;"></div>
+        <div style="text-align:center; margin-top:8px;"><button class="btn gray small" id="castHistoryToggle" style="display:none;" onclick="toggleCastHistoryMore()"></button></div>
       </div>
-      <div id="castHistory" class="cast-hist"></div>
     </div>
   </div>
 
@@ -1395,23 +1404,70 @@ function dupReserve(i){
   if(h.when){ document.getElementById('bcWhen').value = String(h.when).replace(' ','T').slice(0,16); }
   window.scrollTo(0,0);
 }
+// 配信履歴：最新3件だけ表示し、残りは折りたたみ（2026-06-29）。
+// 各カードに本文ワンボタンコピー＋「複製して編集（宛先も複製）」ボタンを付ける。
+function castHistoryCard_(h, i){
+  var when=String(h.at).replace('T',' ').slice(0,16);
+  var body=esc(h.text).replace(/\n/g,'<br>');
+  // 宛先が分かるよう、複製で復元される人数を出す（condにuserIdsがあればその数）。
+  var nTo = (h.cond && h.cond.userIds && h.cond.userIds.length) ? h.cond.userIds.length : (h.total||0);
+  return '<div class="card"><div style="font-size:11px;color:var(--text-muted);">'+esc(when)+' ・ '+esc(h.summary||'全員')+' ・ '+h.total+'人（成功'+h.sent+'）</div>'
+    +'<div class="cast-hist-body" style="font-size:12.5px;margin:6px 0;">'+body+'</div>'
+    +'<div style="display:flex; gap:6px; flex-wrap:wrap;">'
+    +'<button class="btn gray small" onclick="copyCastText('+i+', this)">📋 本文をコピー</button>'
+    +'<button class="btn gray small" onclick="dupCast('+i+')">複製して編集（宛先'+nTo+'名も複製）</button>'
+    +'</div></div>';
+}
 function loadCastHistory(){
   if(!getGasUrl()||!getApiKey()) return;
   callGas('getCastHistory',{}).then(function(r){
     if(!r.ok) return;
     var el=document.getElementById('castHistory');
-    if(!r.history||!r.history.length){ el.innerHTML='<div class="empty">配信履歴はまだありません</div>'; return; }
-    el.innerHTML=r.history.map(function(h,i){
-      window._castHist=r.history;
-      var when=String(h.at).replace('T',' ').slice(0,16);
-      var body=esc(h.text).replace(/\n/g,'<br>');
-      return '<div class="card"><div style="font-size:11px;color:var(--text-muted);">'+esc(when)+' ・ '+esc(h.summary||'全員')+' ・ '+h.total+'人（成功'+h.sent+'）</div>'
-        +'<div style="font-size:12.5px;margin:6px 0;">'+body+'</div>'
-        +'<button class="btn gray small" onclick="dupCast('+i+')">複製して編集</button></div>';
-    }).join('');
+    var moreEl=document.getElementById('castHistoryMore');
+    var toggleBtn=document.getElementById('castHistoryToggle');
+    if(!r.history||!r.history.length){ el.innerHTML='<div class="empty">配信履歴はまだありません</div>'; if(moreEl)moreEl.innerHTML=''; if(toggleBtn)toggleBtn.style.display='none'; return; }
+    window._castHist=r.history;
+    // 最新3件
+    el.innerHTML = r.history.slice(0,3).map(function(h,i){ return castHistoryCard_(h, i); }).join('');
+    // 残り（折りたたみ）
+    if(r.history.length>3 && moreEl){
+      moreEl.innerHTML = r.history.slice(3).map(function(h,i){ return castHistoryCard_(h, i+3); }).join('');
+      moreEl.style.display = STATE._castMoreOpen ? 'block' : 'none';
+      if(toggleBtn){
+        toggleBtn.style.display='inline-block';
+        toggleBtn.textContent = STATE._castMoreOpen ? '閉じる' : ('もっと見る（残り'+(r.history.length-3)+'件）');
+      }
+    } else if(moreEl){
+      moreEl.innerHTML=''; if(toggleBtn) toggleBtn.style.display='none';
+    }
   });
 }
-// 複製：本文だけを引き継いで一斉配信タブを開く（選択分離UIになったので宛先は選び直す）。
+function toggleCastHistoryMore(){
+  STATE._castMoreOpen = !STATE._castMoreOpen;
+  var moreEl=document.getElementById('castHistoryMore');
+  var toggleBtn=document.getElementById('castHistoryToggle');
+  if(moreEl) moreEl.style.display = STATE._castMoreOpen ? 'block' : 'none';
+  if(toggleBtn){
+    var n = (window._castHist||[]).length - 3;
+    toggleBtn.textContent = STATE._castMoreOpen ? '閉じる' : ('もっと見る（残り'+n+'件）');
+  }
+}
+// 本文ワンボタンコピー。
+function copyCastText(i, btn){
+  var h=(window._castHist||[])[i]; if(!h) return;
+  var text = String(h.text||'');
+  var done=function(){ var t=btn.textContent; btn.textContent='✓ コピーしました'; setTimeout(function(){ btn.textContent=t; },1500); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(function(){ fallbackCopy_(text); done(); });
+  } else { fallbackCopy_(text); done(); }
+}
+function fallbackCopy_(text){
+  var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  document.body.removeChild(ta);
+}
+// 複製：本文＋宛先（配信対象）も引き継いで一斉配信タブを開く。宛先は cond.userIds から復元。
 function applyCondToForm(c, text){
   switchTab('cast');
   document.getElementById('bcText').value = text||'';
@@ -1421,7 +1477,18 @@ function dupCast(i){
   applyCondToForm(h.cond||{}, h.text||'');
   document.querySelectorAll('#bcMode input').forEach(function(r){ r.checked=(r.value==='now'); });
   updateModeUI();
-  alert('本文を引き継ぎました。宛先は左の絞り込みから選び直してください。');
+  // 宛先（配信対象）も復元する。cond.userIds があれば、その中で今も存在する友だちを選択中にする。
+  var restored=0, missing=0;
+  STATE.bcSel={};
+  bcEnsureState_();
+  var ids = (h.cond && h.cond.userIds) ? h.cond.userIds : [];
+  var have = {}; (STATE.friends||[]).forEach(function(f){ have[f.userId]=true; });
+  ids.forEach(function(uid){ if(have[uid]){ STATE.bcSel[uid]={manual:false}; restored++; } else { missing++; } });
+  renderBcFilter(); renderBcSelected();
+  var msg='本文と宛先（配信対象）を複製しました。宛先：'+restored+'名を選択中にしました。';
+  if(missing>0) msg+='（'+missing+'名は現在の友だち一覧に見つからず除外）';
+  if(ids.length===0) msg='本文を複製しました。この履歴は宛先情報が無いため、宛先は左の絞り込みから選んでください。';
+  alert(msg);
   window.scrollTo(0,0);
 }
 function toggleSettings(){
