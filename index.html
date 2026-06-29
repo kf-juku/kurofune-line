@@ -1290,6 +1290,15 @@ function bcMode(){ return (document.querySelector('#bcMode input:checked')||{}).
 function updateModeUI(){
   var reserve = bcMode()==='reserve';
   var w = document.getElementById('bcWhenWrap'); if(w) w.style.display = reserve ? 'inline-block' : 'none';
+  // 予約を選んだ瞬間、日時欄が空なら「今から5分後」を自動セット（その後手で変更可）。
+  if (reserve) {
+    var inp = document.getElementById('bcWhen');
+    if (inp && !inp.value) {
+      var t = new Date(Date.now() + 5*60*1000);
+      var pad = function(n){ return (n<10?'0':'')+n; };
+      inp.value = t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate())+'T'+pad(t.getHours())+':'+pad(t.getMinutes());
+    }
+  }
   renderBcSelected(); // ボタン文言を更新
 }
 // 送信確認パネルを開く（宛先＝選択中・本文プレビュー）。ここでは送らない。
