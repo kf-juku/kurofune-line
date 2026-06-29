@@ -351,8 +351,10 @@ header .sub { font-size: 12px; opacity: 0.85; }
       <div class="bc-glabel">💬 本文</div>
       <textarea class="bc-text" id="bcText" placeholder="配信する本文を入力"></textarea>
       <div class="cast2-sendrow">
-        <label style="font-size:13px;"><input type="radio" name="bcMode" value="now" checked onchange="updateModeUI()"> 今すぐ送る</label>
-        <label style="font-size:13px;"><input type="radio" name="bcMode" value="reserve" onchange="updateModeUI()"> 予約する</label>
+        <span id="bcMode">
+          <label style="font-size:13px;"><input type="radio" name="bcMode" value="now" checked onchange="updateModeUI()"> 今すぐ送る</label>
+          <label style="font-size:13px;"><input type="radio" name="bcMode" value="reserve" onchange="updateModeUI()"> 予約する</label>
+        </span>
         <div id="bcWhenWrap" style="display:none;"><input type="datetime-local" id="bcWhen" style="padding:7px; border:1px solid var(--border); border-radius:8px; font-size:13px;"></div>
         <button class="btn" id="bcSendBtn" style="margin-left:auto;" onclick="bcOpenConfirm()">0名に送信</button>
       </div>
