@@ -1338,10 +1338,13 @@ function bcDoSend(btn){
         bcCloseConfirm(); setStatus('✓ 予約しました（'+b.when+'）'); loadReservations();
       }).catch(function(e){ alert('予約エラー: '+e.message); });
     }
-    return callGas('broadcastToUsers',{ userIds:ids, text:text, condSummary:summary }).then(function(b){
+    // 二重送信防止：この送信に一意の sendJobId を1つ付ける。連打・リトライ・別端末同時でも同じIDなら2回送られない。
+    var jobId = 'B_' + Date.now() + '_' + Math.random().toString(36).slice(2,12);
+    return callGas('broadcastToUsers',{ userIds:ids, text:text, condSummary:summary, sendJobId:jobId }).then(function(b){
       if(!b.ok) throw new Error(b.error||'失敗');
       bcCloseConfirm();
-      setStatus('✓ 送信完了：成功'+b.sent+' / 失敗'+b.failed+'（計'+b.total+'）');
+      if(b.duplicate){ setStatus('⚠ この送信はすでに実行済みでした（二重送信を防ぎました）'); }
+      else { setStatus('✓ 送信完了：成功'+b.sent+' / 失敗'+b.failed+'（計'+b.total+'）'); }
       STATE.bcSel = {}; renderBcFilter(); renderBcSelected();
       loadCastHistory();
     }).catch(function(e){ alert('送信エラー: '+e.message); });
