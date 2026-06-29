@@ -136,6 +136,98 @@ header .sub { font-size: 12px; opacity: 0.85; }
 .cast-left, .cast-right { background:white; border:1px solid var(--border); border-radius:10px; padding:14px; }
 .cast-hist { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 @media (max-width:720px){ .cast-grid{grid-template-columns:1fr;} .cast-hist{grid-template-columns:1fr;} .cols{flex-direction:column;} }
+
+/* ===== アカウント管理 コンパクト一覧（2026-06-29 モック準拠で作り直し）===== */
+/* サブタブ（未紐づけ/紐づけ済み/過去生） */
+.acc-subtabs { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+.acc-subtab { font-size:12px; padding:6px 12px; border:1px solid var(--border); background:white; border-radius:8px; cursor:pointer; color:var(--text-muted); font-weight:600; }
+.acc-subtab.active { background:var(--crimson); color:white; border-color:var(--crimson); }
+/* ツールバー（検索・並び替え・絞り込みトグル） */
+.acc-toolbar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:8px 10px; background:var(--surface2); border-radius:8px; margin-bottom:10px; }
+.acc-toolbar input.acc-search { flex:1; min-width:120px; height:32px; padding:0 10px; border:1px solid var(--border); border-radius:6px; font-size:13px; }
+.acc-toolbar select.acc-sort { height:32px; border:1px solid var(--border); border-radius:6px; font-size:13px; background:white; padding:0 6px; }
+.acc-toolbar button.acc-filter-toggle { height:32px; border:1px solid var(--border); border-radius:6px; font-size:12px; background:white; cursor:pointer; padding:0 10px; color:var(--text-muted); }
+.acc-toolbar button.acc-filter-toggle.on { background:var(--crimson-light); border-color:var(--crimson-mid); color:var(--crimson-dark); }
+/* コンパクト一覧 */
+.acc-list { background:white; border:1px solid var(--border); border-radius:8px; max-height:62vh; overflow-y:auto; }
+.acc-list .empty { padding:18px; text-align:center; color:var(--text-light); font-size:13px; }
+.acc-row { display:flex; align-items:center; gap:8px; padding:8px 12px; border-bottom:1px solid #eef0f3; cursor:pointer; }
+.acc-row:last-child { border-bottom:none; }
+.acc-row:hover { background:#fafbfc; }
+.acc-row.open { background:#F7FAF8; }
+.acc-name { font-size:14px; font-weight:600; }
+.acc-b { font-size:10px; border-radius:4px; padding:1px 6px; white-space:nowrap; }
+.acc-b-mem { background:#E1F5EE; color:#0F6E56; }
+.acc-b-self { background:#FAEEDA; color:#854F0B; }
+.acc-b-line { background:#D3D1C7; color:#2C2C2A; }
+.acc-b-status { background:#F1EFE8; color:#5F5E5A; }
+.acc-rt { margin-left:auto; font-size:11px; color:var(--text-light); white-space:nowrap; }
+.acc-rt.unlinked { color:#854F0B; }
+/* アコーディオン詳細 */
+.acc-detail { padding:0 12px 12px; font-size:12px; background:#F7FAF8; border-bottom:1px solid #eef0f3; }
+.acc-detail-head { font-size:10px; margin:8px 0 6px; }
+.acc-detail-head.self { color:#854F0B; }
+.acc-detail-head.mem { color:#0F6E56; }
+.acc-pills { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px; }
+.acc-pill { font-size:11px; border-radius:4px; padding:3px 9px; }
+.acc-pill-self { background:#FAEEDA; color:#854F0B; cursor:pointer; }
+.acc-pill-self:hover { background:#F6E0BD; }
+.acc-pill-empty { background:#F3EEE6; color:#9A7B4F; border:1px dashed #D9C3A0; }
+.acc-pill-mem { background:#E1F5EE; color:#0F6E56; }
+.acc-tag-sel { font-size:11px; padding:2px 6px; border:1px solid var(--crimson-mid); border-radius:4px; background:white; color:#854F0B; }
+.acc-acts { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+.acc-foot { font-size:10px; color:var(--text-light); margin-top:7px; }
+/* 絞り込みパネル（折りたたみ） */
+.acc-filters { display:none; padding:8px 10px; background:#EFF1F0; border-radius:8px; margin-bottom:10px; }
+.acc-filters.show { display:block; }
+/* 紐づけ用 生徒検索モーダル */
+.lp-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:flex-start; justify-content:center; z-index:200; padding:40px 16px; }
+.lp-card { background:white; border-radius:12px; padding:16px; width:100%; max-width:420px; box-shadow:var(--shadow); }
+.lp-head { font-size:14px; font-weight:700; margin-bottom:10px; }
+.lp-search { width:100%; height:36px; padding:0 10px; border:1px solid var(--border); border-radius:7px; font-size:13px; margin-bottom:10px; box-sizing:border-box; }
+.lp-list { max-height:50vh; overflow-y:auto; border:1px solid var(--border); border-radius:8px; }
+.lp-item { padding:9px 12px; border-bottom:1px solid #eef0f3; cursor:pointer; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.lp-item:last-child { border-bottom:none; }
+.lp-item:hover { background:var(--crimson-light); }
+.lp-foot { margin-top:10px; text-align:right; }
+/* ===== 一斉配信UI刷新（2026-06-29 絞り込み/選択分離）===== */
+.cast2-grid { display:grid; grid-template-columns:2fr 1fr; gap:12px; align-items:start; }
+.cast2-left, .cast2-right { background:white; border:1px solid var(--border); border-radius:12px; padding:12px; }
+.bc2-filters { display:flex; flex-wrap:wrap; gap:4px 14px; padding:8px 10px; background:var(--surface2); border-radius:8px; margin-bottom:10px; }
+.bc2-filters .bc-group { margin-bottom:4px; }
+.bc2-resulthead { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; gap:8px; flex-wrap:wrap; }
+.bc2-resultcount { font-size:13px; color:var(--text-muted); }
+.bc2-resultlist { border:1px solid var(--border); border-radius:8px; max-height:40vh; overflow-y:auto; }
+.bc2-resultlist .empty { color:var(--text-light); font-size:13px; text-align:center; }
+.bc2-rrow { display:flex; align-items:center; gap:8px; font-size:13px; padding:7px 10px; border-bottom:1px solid #eef0f3; cursor:pointer; }
+.bc2-rrow:last-child { border-bottom:none; }
+.bc2-rrow:hover { background:#fafbfc; }
+.bc2-rrow input { margin:0; }
+.bc2-rmeta { margin-left:auto; font-size:11px; color:var(--text-light); }
+/* 右：選択中 */
+.cast2-right { background:#E1F5EE; border-color:#5DCAA5; }
+.bc2-sel-h { font-size:13px; font-weight:700; color:#0F6E56; }
+.bc2-sel-sub { font-size:11px; color:#085041; margin-bottom:10px; }
+.bc2-sellist { max-height:46vh; overflow-y:auto; }
+.bc2-sellist .empty { color:#0F6E56; font-size:12px; }
+.bc2-chip { display:flex; align-items:center; gap:6px; font-size:13px; background:white; border-radius:6px; padding:6px 8px; margin:4px 0; }
+.bc2-chip input { margin:0; }
+.bc2-chip-meta { margin-left:auto; font-size:10px; color:#0F6E56; }
+.bc2-chip.manual { background:#FAEEDA; border:1px solid #EF9F27; }
+.bc2-chip.manual .bc2-chip-meta { color:#854F0B; }
+/* 本文・送信 */
+.cast2-body { background:white; border:1px solid var(--border); border-radius:12px; padding:12px; margin-top:12px; }
+.cast2-sendrow { display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap; }
+/* 確認パネル */
+.bc2-confirm { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:flex-start; justify-content:center; z-index:200; padding:40px 16px; }
+.bc2-confirm-card { background:white; border-radius:12px; padding:16px; width:100%; max-width:400px; box-shadow:var(--shadow); }
+.bc2-confirm-title { font-size:15px; font-weight:700; margin-bottom:12px; }
+.bc2-confirm-label { font-size:12px; color:var(--text-muted); margin-bottom:4px; }
+.bc2-confirm-to { background:var(--surface2); border-radius:6px; padding:8px 10px; font-size:13px; margin-bottom:10px; max-height:120px; overflow-y:auto; }
+.bc2-confirm-body { background:#E1F5EE; border-radius:8px; padding:10px 12px; font-size:13px; color:#04342C; margin-bottom:14px; white-space:pre-wrap; }
+.bc2-confirm-acts { display:flex; gap:8px; }
+.bc2-confirm-acts .btn { flex:1; }
+@media (max-width:720px){ .cast2-grid{grid-template-columns:1fr;} }
 </style>
 </head>
 <body>
@@ -169,52 +261,89 @@ header .sub { font-size: 12px; opacity: 0.85; }
   </div>
 
   <div class="tab-panel active" id="panelLink">
-  <div class="cols">
-    <div class="col">
-      <h2>👤 LINE友だち <span class="count-badge" id="friendCount">0</span></h2>
-      <p class="hint">未紐づけの友だちを自動で選んで候補を表示します。別の友だちはクリックで切り替えられます。</p>
-      <div class="list" id="friendList"><div class="empty">接続設定（⚙️）を入れてください</div></div>
+    <!-- サブタブ：紐づけ状態で切替 -->
+    <div class="acc-subtabs" id="accSubtabs">
+      <div class="acc-subtab active" data-acctab="unlinked" onclick="setAccTab('unlinked')">未紐づけ <span id="accCntUnlinked">0</span></div>
+      <div class="acc-subtab" data-acctab="linked" onclick="setAccTab('linked')">紐づけ済み <span id="accCntLinked">0</span></div>
+      <div class="acc-subtab" data-acctab="past" onclick="setAccTab('past')">過去生 <span id="accCntPast">0</span></div>
     </div>
-    <div class="col">
-      <h2><span id="memberHeading">🎓 生徒マスタ（会員管理）</span> <span class="count-badge" id="memberCount">0</span></h2>
-      <div style="display:flex; gap:8px; margin-bottom:8px;">
-        <input class="search-box" id="memberSearch" placeholder="名前や読みで生徒を検索" oninput="renderMembers()" style="margin-bottom:0; flex:1;">
-        <select class="search-box" id="gradeFilter" onchange="renderMembers()" style="margin-bottom:0; width:130px;">
-          <option value="">学年すべて</option>
-          <option>小学1年生</option><option>小学2年生</option><option>小学3年生</option>
-          <option>小学4年生</option><option>小学5年生</option><option>小学6年生</option>
-          <option>中学1年生</option><option>中学2年生</option><option>中学3年生</option>
-          <option>高校1年生</option><option>高校2年生</option><option>高校3年生</option>
-        </select>
-      </div>
-      <div class="list" id="memberList"><div class="empty">未読み込み</div></div>
+    <!-- ツールバー：検索・並び替え・絞り込みトグル -->
+    <div class="acc-toolbar">
+      <input class="acc-search" id="accSearch" placeholder="名前で検索" oninput="renderAccList()">
+      <select class="acc-sort" id="accSort" onchange="renderAccList()">
+        <option value="reg">新規登録順</option>
+        <option value="name">名前順</option>
+        <option value="grade">学年順</option>
+      </select>
+      <button class="acc-filter-toggle" id="accFilterToggle" onclick="toggleAccFilters()">▾ 絞り込み</button>
     </div>
-  </div>
+    <!-- 絞り込みパネル（A-④：状態・学年・教室・コース。一斉配信とUIを揃える） -->
+    <div class="acc-filters" id="accFilters">
+      <div class="bc-group"><div class="bc-glabel">状態</div><div class="bc-checks" id="afStatus"><label><input type="checkbox" value="在籍" onchange="renderAccList()">在籍</label><label><input type="checkbox" value="休会" onchange="renderAccList()">休会</label><label><input type="checkbox" value="退会" onchange="renderAccList()">退会</label><label><input type="checkbox" value="見込み客" onchange="renderAccList()">見込み客</label></div></div>
+      <div class="bc-group"><div class="bc-glabel">コース<span class="help-chip" data-tip="塾/CAは紐づけ済みの会員だけが対象です。">?</span></div><div class="bc-checks" id="afCourse"><label><input type="radio" name="afCourse" value="" checked onchange="renderAccList()">指定なし</label><label><input type="radio" name="afCourse" value="juku" onchange="renderAccList()">クロフネ</label><label><input type="radio" name="afCourse" value="ca" onchange="renderAccList()">CA</label></div></div>
+      <div class="bc-group"><div class="bc-glabel">教室</div><div class="bc-checks" id="afRoom"><label><input type="checkbox" value="北久里浜教室" onchange="renderAccList()">北久里浜</label><label><input type="checkbox" value="京急久里浜駅前教室" onchange="renderAccList()">京急久里浜駅前</label></div></div>
+      <div class="bc-group"><div class="bc-glabel">学年</div><div class="bc-checks" id="afGrade"><label><input type="checkbox" value="小学1年生" onchange="renderAccList()">小1</label><label><input type="checkbox" value="小学2年生" onchange="renderAccList()">小2</label><label><input type="checkbox" value="小学3年生" onchange="renderAccList()">小3</label><label><input type="checkbox" value="小学4年生" onchange="renderAccList()">小4</label><label><input type="checkbox" value="小学5年生" onchange="renderAccList()">小5</label><label><input type="checkbox" value="小学6年生" onchange="renderAccList()">小6</label><label><input type="checkbox" value="中学1年生" onchange="renderAccList()">中1</label><label><input type="checkbox" value="中学2年生" onchange="renderAccList()">中2</label><label><input type="checkbox" value="中学3年生" onchange="renderAccList()">中3</label><label><input type="checkbox" value="高校1年生" onchange="renderAccList()">高1</label><label><input type="checkbox" value="高校2年生" onchange="renderAccList()">高2</label><label><input type="checkbox" value="高校3年生" onchange="renderAccList()">高3</label></div></div>
+      <div style="text-align:right;"><button class="btn gray small" onclick="clearAccFilters()">絞り込みをクリア</button></div>
+    </div>
+    <!-- コンパクト一覧 -->
+    <div class="acc-list" id="accList"><div class="empty">接続設定（⚙️）を入れてください</div></div>
   </div>
 
   <div class="tab-panel" id="panelCast">
-    <div class="cast-grid">
-      <div class="cast-left">
-        <h2 style="font-size:14px; margin:0 0 8px;">絞り込み条件</h2>
-        <p class="hint">複数選択できます（例：中1と中2）。チェックした項目の<b>いずれか</b>が対象。未チェック欄は「すべて」。</p>
-        <div class="bc-group"><div class="bc-glabel">登録者</div><div class="bc-checks" id="bcKind"><label><input type="checkbox" value="保護者">保護者</label><label><input type="checkbox" value="生徒">生徒</label></div></div>
-        <div class="bc-group"><div class="bc-glabel">入会状況</div><div class="bc-checks" id="bcEnroll"><label><input type="checkbox" value="入会している">入会している</label><label><input type="checkbox" value="入会していない">入会していない</label></div></div>
-        <div class="bc-group"><div class="bc-glabel">学年</div><div class="bc-checks" id="bcGrade"><label><input type="checkbox" value="小学1年生">小1</label><label><input type="checkbox" value="小学2年生">小2</label><label><input type="checkbox" value="小学3年生">小3</label><label><input type="checkbox" value="小学4年生">小4</label><label><input type="checkbox" value="小学5年生">小5</label><label><input type="checkbox" value="小学6年生">小6</label><label><input type="checkbox" value="中学1年生">中1</label><label><input type="checkbox" value="中学2年生">中2</label><label><input type="checkbox" value="中学3年生">中3</label><label><input type="checkbox" value="高校1年生">高1</label><label><input type="checkbox" value="高校2年生">高2</label><label><input type="checkbox" value="高校3年生">高3</label></div></div>
-        <div class="bc-group"><div class="bc-glabel">コース<span class="help-chip" data-tip="塾/CA・受講オプションは紐づけ済みの友だちだけが対象です。">?</span></div><div class="bc-checks" id="bcCourse"><label><input type="radio" name="bcCourse" value="" checked>指定なし</label><label><input type="radio" name="bcCourse" value="juku">塾生</label><label><input type="radio" name="bcCourse" value="ca">CA生</label></div></div>
-        <div class="bc-group"><div class="bc-glabel">受講オプション</div><div class="bc-checks" id="bcOption"><label><input type="checkbox" value="eiken">英検対策</label><label><input type="checkbox" value="juken">受験特訓</label></div></div>
+    <!-- 一斉配信UI刷新（2026-06-29 モック準拠）：絞り込み（表示フィルタ）と選択（送信対象）を完全分離 -->
+    <div class="cast2-grid">
+      <!-- 左2/3：絞り込み -->
+      <div class="cast2-left">
+        <div class="bc-glabel">🔍 絞り込み（映る人を絞るだけ・選択は消えません）</div>
+        <div class="bc2-filters">
+          <div class="bc-group"><div class="bc-glabel">種別</div><div class="bc-checks" id="bcKind"><label><input type="checkbox" value="保護者" onchange="renderBcFilter()">保護者</label><label><input type="checkbox" value="生徒" onchange="renderBcFilter()">生徒</label></div></div>
+          <div class="bc-group"><div class="bc-glabel">状態<span class="help-chip" data-tip="紐づけ済み＝会員管理ステータスが正。未紐づけ＝見込み客。普段は在籍だけONでOK。">?</span></div><div class="bc-checks" id="bcStatus"><label><input type="checkbox" value="在籍" checked onchange="renderBcFilter()">在籍</label><label><input type="checkbox" value="休会" onchange="renderBcFilter()">休会</label><label><input type="checkbox" value="退会" onchange="renderBcFilter()">退会（過去生）</label><label><input type="checkbox" value="見込み客" onchange="renderBcFilter()">見込み客</label></div></div>
+          <div class="bc-group"><div class="bc-glabel">コース<span class="help-chip" data-tip="塾/CAは紐づけ済みの会員だけが対象です。">?</span></div><div class="bc-checks" id="bcCourse"><label><input type="radio" name="bcCourse" value="" checked onchange="renderBcFilter()">指定なし</label><label><input type="radio" name="bcCourse" value="juku" onchange="renderBcFilter()">クロフネ</label><label><input type="radio" name="bcCourse" value="ca" onchange="renderBcFilter()">CA</label></div></div>
+          <div class="bc-group"><div class="bc-glabel">教室</div><div class="bc-checks" id="bcRoom"><label><input type="checkbox" value="北久里浜教室" onchange="renderBcFilter()">北久里浜</label><label><input type="checkbox" value="京急久里浜駅前教室" onchange="renderBcFilter()">京急久里浜駅前</label></div></div>
+          <div class="bc-group"><div class="bc-glabel">学年</div><div class="bc-checks" id="bcGrade"><label><input type="checkbox" value="小学1年生" onchange="renderBcFilter()">小1</label><label><input type="checkbox" value="小学2年生" onchange="renderBcFilter()">小2</label><label><input type="checkbox" value="小学3年生" onchange="renderBcFilter()">小3</label><label><input type="checkbox" value="小学4年生" onchange="renderBcFilter()">小4</label><label><input type="checkbox" value="小学5年生" onchange="renderBcFilter()">小5</label><label><input type="checkbox" value="小学6年生" onchange="renderBcFilter()">小6</label><label><input type="checkbox" value="中学1年生" onchange="renderBcFilter()">中1</label><label><input type="checkbox" value="中学2年生" onchange="renderBcFilter()">中2</label><label><input type="checkbox" value="中学3年生" onchange="renderBcFilter()">中3</label><label><input type="checkbox" value="高校1年生" onchange="renderBcFilter()">高1</label><label><input type="checkbox" value="高校2年生" onchange="renderBcFilter()">高2</label><label><input type="checkbox" value="高校3年生" onchange="renderBcFilter()">高3</label></div></div>
+          <div class="bc-group"><div class="bc-glabel">受講オプション<span class="help-chip" data-tip="紐づけ済みの会員だけが対象です。">?</span></div><div class="bc-checks" id="bcOption"><label><input type="checkbox" value="eiken" onchange="renderBcFilter()">英検対策</label><label><input type="checkbox" value="juken" onchange="renderBcFilter()">受験特訓</label></div></div>
+        </div>
+        <div class="bc2-resulthead">
+          <span class="bc2-resultcount" id="bcResultCount">絞り込み結果 0名</span>
+          <button class="btn gray small" onclick="bcAddAllShown()">☑ 表示中を全て選択に追加</button>
+        </div>
+        <div class="bc2-resultlist" id="bcResultList"><div class="empty" style="padding:14px;">条件を選ぶと候補が出ます</div></div>
       </div>
-      <div class="cast-right">
-        <div class="bc-glabel">本文</div>
-        <textarea class="bc-text" id="bcText" placeholder="配信する本文を入力"></textarea>
-        <div class="bc-row" style="margin-top:10px;"><button class="btn gray" onclick="bcCount(this)">対象を確認</button><span class="bc-count" id="bcCountOut"></span></div>
-        <div id="bcNameList" style="font-size:12px; color:var(--text-muted); margin:4px 0 10px; max-height:100px; overflow-y:auto;"></div>
-        <div class="bc-glabel" style="margin-top:10px;">送信方法</div>
-        <div class="bc-checks" id="bcMode"><label><input type="radio" name="bcMode" value="now" checked onchange="updateModeUI()">今すぐ送る</label><label><input type="radio" name="bcMode" value="reserve" onchange="updateModeUI()">予約する</label></div>
-        <div id="bcWhenWrap" style="display:none; margin:8px 0;"><div class="bc-glabel">送信予定日時</div><input type="datetime-local" id="bcWhen" style="padding:8px; border:1px solid var(--border); border-radius:8px; font-size:14px;"></div>
-        <button class="btn" id="bcSendBtn" style="width:100%;" onclick="bcSubmit(this)">この条件で今すぐ送信</button>
-        <p class="hint" style="margin-top:8px;">※一斉配信は条件に合う友だち全員に届きます（「自動通知ON/OFF」の設定は関係しません）。<br>※予約は1分ごとのチェックで送るため、指定時刻から最大1分ほど遅れることがあります。</p>
+      <!-- 右1/3：選択中 -->
+      <div class="cast2-right">
+        <div class="bc2-sel-h">👥 選択中 <span id="bcSelCount">0</span>名</div>
+        <div class="bc2-sel-sub">フィルタを変えても消えません</div>
+        <div class="bc2-sellist" id="bcSelList"><div class="empty" style="padding:10px;">まだ選択がありません</div></div>
       </div>
     </div>
+    <!-- 本文＋送信 -->
+    <div class="cast2-body">
+      <div class="bc-glabel">💬 本文</div>
+      <textarea class="bc-text" id="bcText" placeholder="配信する本文を入力"></textarea>
+      <div class="cast2-sendrow">
+        <label style="font-size:13px;"><input type="radio" name="bcMode" value="now" checked onchange="updateModeUI()"> 今すぐ送る</label>
+        <label style="font-size:13px;"><input type="radio" name="bcMode" value="reserve" onchange="updateModeUI()"> 予約する</label>
+        <div id="bcWhenWrap" style="display:none;"><input type="datetime-local" id="bcWhen" style="padding:7px; border:1px solid var(--border); border-radius:8px; font-size:13px;"></div>
+        <button class="btn" id="bcSendBtn" style="margin-left:auto;" onclick="bcOpenConfirm()">0名に送信</button>
+      </div>
+      <p class="hint" style="margin-top:8px;">※「送信」を押すと確認パネルが出ます。そこで確定するまで送られません。<br>※一斉配信は「自動通知ON/OFF」に関係なく、選択中の全員に届きます。予約は最大1分ほど遅れることがあります。</p>
+    </div>
+    <!-- 送信確認パネル（モーダル）：宛先＋本文プレビュー。確定で初めて送信 -->
+    <div class="bc2-confirm" id="bcConfirm" style="display:none;">
+      <div class="bc2-confirm-card">
+        <div class="bc2-confirm-title" id="bcConfirmTitle">⚠️ この内容で送信しますか？</div>
+        <div class="bc2-confirm-label">宛先（<span id="bcConfirmCount">0</span>名）</div>
+        <div class="bc2-confirm-to" id="bcConfirmTo"></div>
+        <div class="bc2-confirm-label">本文プレビュー</div>
+        <div class="bc2-confirm-body" id="bcConfirmBody"></div>
+        <div id="bcConfirmWhen" class="bc2-confirm-label" style="display:none;"></div>
+        <div class="bc2-confirm-acts">
+          <button class="btn gray" onclick="bcCloseConfirm()">やめる</button>
+          <button class="btn" id="bcConfirmSend" style="flex:2;" onclick="bcDoSend(this)">✓ この内容で送信</button>
+        </div>
+      </div>
+    </div>
+
     <div style="border-top:1px solid var(--border); margin-top:14px; padding-top:12px;">
       <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
         <h2 style="font-size:14px; margin:0;">⏰ 予約中の配信</h2>
@@ -233,7 +362,7 @@ header .sub { font-size: 12px; opacity: 0.85; }
 
 </div>
 <script>
-var STATE = { friends: [], members: [], selectedUserId: null };
+var STATE = { friends: [], members: [], selectedUserId: null, accTab: 'unlinked', accOpenId: null, accEditUser: null, accEditField: null };
 
 function $(id){ return document.getElementById(id); }
 function setStatus(msg){ $('statusMsg').textContent = msg || ''; }
@@ -293,12 +422,8 @@ function loadAll(){
       if (!m.ok) throw new Error('生徒取得失敗: ' + (m.error||''));
       STATE.friends = f.friends || [];
       STATE.members = m.members || [];
-      // 未紐づけの友だちがいれば先頭を自動選択して候補を出す
-      var firstUnlinked = STATE.friends.filter(function(x){ return !x.studentId; })[0];
-      STATE.selectedUserId = firstUnlinked ? firstUnlinked.userId : null;
-      $('memberSearch').value = '';
-      renderFriends();
-      renderMembers();
+      STATE.accOpenId = null;
+      renderAccList();
       var n = STATE.friends.filter(function(x){ return !x.studentId; }).length;
       setStatus('読み込み完了（未紐づけ ' + n + '件）'); loadCastHistory(); loadReservations();
     })
@@ -308,6 +433,9 @@ function loadAll(){
 function selectedFriend(){
   return STATE.friends.filter(function(f){ return f.userId === STATE.selectedUserId; })[0] || null;
 }
+// 旧UI（renderFriends_OLD_unused）からのみ参照される空スタブ。新UIでは未使用だが未定義参照をなくすため残す。
+// TODO(次回・bash復旧後にcheck_html検証してから)：旧未使用関数 renderFriends_OLD_unused / renderMembers_OLD_unused / tagEditorHtml_ / updateMemberHeading / gradeToShort_ / このスタブ をまとめて削除する。
+function selectFriend(){ /* no-op（旧UI互換） */ }
 
 function memberById_(id){
   if (!id) return null;
@@ -315,7 +443,344 @@ function memberById_(id){
   return hit.length ? hit[0] : null;
 }
 
-function renderFriends(){
+/* ===== アカウント管理 コンパクト一覧（2026-06-29 モック準拠で作り直し）=====
+   旧 renderFriends/renderMembers（2カラム＋生徒マスタ）を廃止し、1行=1人の一覧に統合。
+   タブ：未紐づけ（見込み客）／紐づけ済み（在籍・休会）／過去生（退会）。
+   状態判定：紐づけ済み＝会員管理ステータス(memberById_)が正。会員が見つからない場合は「会員情報なし」。
+   過去生＝紐づけ済みかつ会員管理ステータスが「退会」。紐づけ済みタブは退会以外（在籍・休会・状態不明）。 */
+
+// サブタブ切替
+function setAccTab(tab){
+  STATE.accTab = tab;
+  STATE.accOpenId = null; // タブ切替で開いている行は閉じる
+  document.querySelectorAll('#accSubtabs .acc-subtab').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-acctab')===tab);
+  });
+  renderAccList();
+}
+
+// 絞り込みパネルの開閉（中身は A-④ で実装）
+function toggleAccFilters(){
+  var p = $('accFilters'); var btn = $('accFilterToggle');
+  var show = !p.classList.contains('show');
+  p.classList.toggle('show', show);
+  btn.classList.toggle('on', show);
+  btn.textContent = (show?'▴':'▾') + ' 絞り込み';
+}
+
+// 友だち1人が「過去生（退会）」かどうか：紐づけ済みかつ会員ステータスが退会
+function isPastFriend_(fr){
+  if (!fr.studentId) return false;
+  var mem = memberById_(fr.studentId);
+  return !!(mem && String(mem.status||'')==='退会');
+}
+
+// 現在のタブに属する友だちか
+function inAccTab_(fr){
+  var linked = !!fr.studentId;
+  if (STATE.accTab==='unlinked') return !linked;
+  if (STATE.accTab==='past')     return isPastFriend_(fr);
+  // linked タブ：紐づけ済みで、退会ではない（在籍・休会・会員情報なしを含む）
+  return linked && !isPastFriend_(fr);
+}
+
+// 学年フルネーム→ソート用の数値（小1=1 … 高3=12、その他/不明=99）
+function gradeRank_(grade){
+  var g = String(grade||'');
+  var base = g.indexOf('小')>=0?0 : g.indexOf('中')>=0?6 : g.indexOf('高')>=0?9 : -1;
+  if (base<0) return 99;
+  var m = g.match(/([0-9０-９1-6])/);
+  var n = m ? parseInt(m[1].replace(/[０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);}),10) : 0;
+  return base + (n||0);
+}
+
+// 友だちの「表示用の名前・学年・教室・状態」を出どころ込みで返す
+// 紐づけ済み＝会員管理が正、未紐づけ＝本人入力／LINE名。
+function accDisplay_(fr){
+  var linked = !!fr.studentId;
+  var mem = linked ? memberById_(fr.studentId) : null;
+  if (linked && mem){
+    return { name: mem.name||'(会員名なし)', grade: mem.grade||'', room: mem.classroom||'',
+             status: mem.status||'', src:'mem', lineName: fr.name||'' };
+  }
+  if (linked){ // 紐づけ済みだが会員が見つからない
+    return { name: fr.name||'(表示名なし)', grade:'', room:'', status:'会員情報なし', src:'line', lineName: fr.name||'' };
+  }
+  // 未紐づけ＝見込み客（本人入力タグ）
+  return { name: fr.name||'(表示名なし)', grade: fr.grade||'', room: fr.room||'',
+           status:'見込み客', src:'self', lineName: fr.name||'' };
+}
+
+function renderAccList(){
+  var el = $('accList');
+  if (!el) return;
+  // タブごとの件数を更新
+  var all = STATE.friends || [];
+  var cntUnlinked=0, cntLinked=0, cntPast=0;
+  all.forEach(function(fr){
+    if (!fr.studentId) cntUnlinked++;
+    else if (isPastFriend_(fr)) cntPast++;
+    else cntLinked++;
+  });
+  $('accCntUnlinked').textContent = cntUnlinked;
+  $('accCntLinked').textContent   = cntLinked;
+  $('accCntPast').textContent     = cntPast;
+
+  if (!all.length){ el.innerHTML = '<div class="empty">友だちがいません</div>'; return; }
+
+  // タブで絞る
+  var rows = all.filter(inAccTab_);
+
+  // 名前検索（表示名・入力名・会員名すべて対象）
+  var q = ($('accSearch').value||'').trim();
+  if (q){
+    rows = rows.filter(function(fr){
+      var d = accDisplay_(fr);
+      return (d.name.indexOf(q)>=0) || ((fr.name||'').indexOf(q)>=0) || ((fr.inName||'').indexOf(q)>=0);
+    });
+  }
+
+  // 絞り込み（A-④で適用。今は素通し）
+  rows = applyAccFilters_(rows);
+
+  // 並び替え
+  var sort = ($('accSort').value||'reg');
+  if (sort==='name'){
+    rows = rows.slice().sort(function(a,b){ return accDisplay_(a).name.localeCompare(accDisplay_(b).name,'ja'); });
+  } else if (sort==='grade'){
+    rows = rows.slice().sort(function(a,b){ return gradeRank_(accDisplay_(a).grade) - gradeRank_(accDisplay_(b).grade); });
+  } // reg=新規登録順＝配列順（シート行順）のまま
+
+  if (!rows.length){ el.innerHTML = '<div class="empty">該当する友だちがいません</div>'; return; }
+
+  el.innerHTML = rows.map(function(fr){
+    var d = accDisplay_(fr);
+    var open = STATE.accOpenId === fr.userId;
+    var bCls = d.src==='mem' ? 'acc-b-mem' : (d.src==='self' ? 'acc-b-self' : 'acc-b-line');
+    var badges = '';
+    if (d.grade) badges += '<span class="acc-b '+bCls+'">'+esc(normGrade_(d.grade))+'</span>';
+    if (d.room)  badges += '<span class="acc-b '+bCls+'">'+esc(shortRoom_(d.room))+'</span>';
+    if (d.status && d.status!=='見込み客') badges += '<span class="acc-b acc-b-status">'+esc(d.status)+'</span>';
+    var rt = !fr.studentId
+      ? '<span class="acc-rt unlinked">未紐づけ '+(open?'▴':'▾')+'</span>'
+      : '<span class="acc-rt">紐づけ済 '+(open?'▴':'▾')+'</span>';
+    var rowHtml = '<div class="acc-row'+(open?' open':'')+'" onclick="toggleAccRow(\''+esc(fr.userId)+'\')">'
+      + '<span class="acc-name">'+esc(d.name)+'</span>'
+      + badges + rt + '</div>';
+    var detail = open ? accDetailHtml_(fr) : '';
+    return rowHtml + detail;
+  }).join('');
+}
+
+// 教室名を短縮（北久里浜教室→北久里浜、京急久里浜駅前教室→京急久里浜）
+function shortRoom_(room){
+  return String(room||'').replace('教室','').replace('駅前','');
+}
+
+// 絞り込み適用（A-④）。状態・学年・教室・コースで絞る。一斉配信と同じ bcEffective_ を使う。
+// 紐づけ済み＝会員管理が正、未紐づけ＝見込み客＋LINEタグ。絞り込みパネルが閉じていても値があれば効く。
+function applyAccFilters_(rows){
+  var statuses = checkedVals('afStatus');
+  var grades   = checkedVals('afGrade');
+  var roomsArr = checkedVals('afRoom');
+  var course   = (document.querySelector('#afCourse input:checked')||{}).value||'';
+  if (!statuses.length && !grades.length && !roomsArr.length && !course) return rows; // 何も指定なし
+  return rows.filter(function(fr){
+    var e = bcEffective_(fr);
+    if (statuses.length && statuses.indexOf(e.status)<0) return false;
+    if (grades.length   && grades.indexOf(e.grade)<0) return false;
+    if (roomsArr.length && roomsArr.indexOf(e.room)<0) return false;
+    if (course){
+      if (!fr.studentId) return false; // コースは紐づけ済みのみ
+      if (course==='juku' && !e.attrJuku) return false;
+      if (course==='ca'   && !e.attrCa)   return false;
+    }
+    return true;
+  });
+}
+
+// 絞り込みをクリア
+function clearAccFilters(){
+  ['afStatus','afGrade','afRoom'].forEach(function(id){
+    document.querySelectorAll('#'+id+' input[type=checkbox]').forEach(function(c){ c.checked=false; });
+  });
+  var none=document.querySelector('#afCourse input[value=""]'); if(none) none.checked=true;
+  renderAccList();
+}
+
+// 行クリックで詳細展開／閉じる
+function toggleAccRow(userId){
+  STATE.accOpenId = (STATE.accOpenId===userId) ? null : userId;
+  renderAccList();
+}
+
+// アコーディオン詳細（A-②：色分け枠＋アクション。A-③でタグ押下編集に差し替え）
+// 未紐づけ＝オレンジ枠（本人入力）＋[紐づける][送信ON/OFF]。紐づけ済み＝緑枠（会員管理）＋[送信ON/OFF][紐づけ解除]。
+function accDetailHtml_(fr){
+  var uid = esc(fr.userId);
+  var linked = !!fr.studentId;
+  var busy = (STATE._busy === fr.userId);
+  var sendBtn = busy
+    ? '<button class="btn gray small" disabled style="opacity:.6">処理中…</button>'
+    : '<button class="btn gray small" onclick="event.stopPropagation();toggleSend(\''+uid+'\','+(!fr.sendOn)+')">'
+      + (fr.sendOn?'自動通知OFFにする':'自動通知ONにする') + '</button>';
+  var lineFoot = '<div class="acc-foot"><span class="acc-b acc-b-line">LINE名: '+esc(fr.name||'')+'</span></div>';
+
+  if (linked) {
+    var mem = memberById_(fr.studentId);
+    var pills = '';
+    if (mem) {
+      if (mem.grade)     pills += '<span class="acc-pill acc-pill-mem">'+esc(mem.grade)+'</span>';
+      if (mem.classroom) pills += '<span class="acc-pill acc-pill-mem">'+esc(mem.classroom)+'</span>';
+      if (mem.status)    pills += '<span class="acc-pill acc-pill-mem">'+esc(mem.status)+'</span>';
+    }
+    var headMem = mem
+      ? '<div class="acc-detail-head mem">🎓 会員管理の情報（正式・編集不可）</div>'
+      : '<div class="acc-detail-head mem">⚠ 紐づけ先の会員が見つかりません（id: '+esc(fr.studentId)+'）</div>';
+    return '<div class="acc-detail">'
+      + headMem
+      + '<div class="acc-pills">'+(pills||'<span class="acc-foot">情報なし</span>')+'</div>'
+      + '<div class="acc-acts">'+sendBtn
+        + (busy?'':'<button class="btn gray small" onclick="event.stopPropagation();unlink(\''+uid+'\')">紐づけ解除</button>')
+        + '</div>'
+      + lineFoot
+      + '<div class="acc-foot">会員管理が正＝ここでは編集できません</div>'
+      + '</div>';
+  }
+
+  // 未紐づけ（見込み客）：本人入力タグを「押すと編集」ピルで表示（A-③・二重表示を廃止）
+  return '<div class="acc-detail">'
+    + '<div class="acc-detail-head self">✏️ 本人がアンケートで入力した内容（タグを押すと編集）</div>'
+    + accTagPills_(fr)
+    + '<div class="acc-acts">'
+      + '<button class="btn green small" onclick="event.stopPropagation();openLinkPicker_(\''+uid+'\')">この友だちを生徒に紐づける</button>'
+      + sendBtn
+      + '</div>'
+    + lineFoot
+    + '</div>';
+}
+
+// 未紐づけ友だちの本人入力タグを「押すと編集」ピルで表示する（A-③）。
+// 各ピルは押すと editAccTag_ でその場プルダウン編集になる。STATE.accEditField で開いている項目を保持。
+function accTagPills_(fr){
+  var uid = esc(fr.userId);
+  // 編集対象の6項目：種別 / 区分(level) / 学年 / コース / 教室 / 入会状況(memo)
+  var fields = [
+    { key:'kind',   label:'種別',   value:fr.kind,  placeholder:'種別' },
+    { key:'level',  label:'区分',   value:fr.level, placeholder:'学校区分' },
+    { key:'grade',  label:'学年',   value:fr.grade, placeholder:'学年' },
+    { key:'course', label:'コース', value:fr.course,placeholder:'コース' },
+    { key:'room',   label:'教室',   value:fr.room,  placeholder:'教室' },
+    { key:'enroll', label:'入会',   value:fr.memo,  placeholder:'入会状況' }
+  ];
+  var editing = (STATE.accEditUser===fr.userId) ? STATE.accEditField : null;
+  var html = fields.map(function(f){
+    if (editing===f.key){
+      return accTagSelect_(fr, f.key);
+    }
+    var shown = f.value ? esc(f.value) : ('＋'+f.placeholder);
+    var cls = f.value ? 'acc-pill acc-pill-self' : 'acc-pill acc-pill-self acc-pill-empty';
+    return '<span class="'+cls+'" onclick="event.stopPropagation();editAccTag_(\''+uid+'\',\''+f.key+'\')">'+shown+' ✎</span>';
+  }).join('');
+  return '<div class="acc-pills">'+html+'</div>';
+}
+
+// 指定項目のインライン編集プルダウンを返す（選択で保存→ピルに戻る）。
+function accTagSelect_(fr, field){
+  var uid = esc(fr.userId);
+  var opts, cur;
+  if (field==='kind')        { opts=['保護者','生徒']; cur=fr.kind; }
+  else if (field==='level')  { opts=['小学生','中学生','高校生']; cur=fr.level; }
+  else if (field==='grade')  { opts=gradeOptsForLevel_(fr.level); cur=fr.grade; }
+  else if (field==='course') { opts=['進学塾クロフネ','コードアドベンチャー','両方']; cur=fr.course; }
+  else if (field==='room')   { opts=['北久里浜教室','京急久里浜駅前教室']; cur=fr.room; }
+  else if (field==='enroll') { opts=['入会している','入会していない']; cur=fr.memo; }
+  else { opts=[]; cur=''; }
+  var o = '<option value="">未設定</option>';
+  opts.forEach(function(v){ o += '<option value="'+esc(v)+'"'+(String(cur)===v?' selected':'')+'>'+esc(v)+'</option>'; });
+  return '<select class="acc-tag-sel" onclick="event.stopPropagation()" '
+    + 'onchange="event.stopPropagation();saveAccTag_(\''+uid+'\',\''+field+'\',this.value)" '
+    + 'onblur="event.stopPropagation();cancelAccTag_()">'+o+'</select>';
+}
+
+// ピルを押して編集状態にする（学年は区分未設定だと選べないので案内）。
+function editAccTag_(userId, field){
+  var fr = STATE.friends.filter(function(f){ return f.userId===userId; })[0];
+  if (!fr) return;
+  if (field==='grade' && !fr.level){ alert('先に「区分」（小学生／中学生／高校生）を選んでください'); field='level'; }
+  STATE.accEditUser = userId;
+  STATE.accEditField = field;
+  renderAccList();
+  // 開いたプルダウンにフォーカス
+  setTimeout(function(){ var s=document.querySelector('.acc-tag-sel'); if(s) s.focus(); }, 0);
+}
+
+// 編集をキャンセル（選択せずに外れたとき）。
+function cancelAccTag_(){
+  STATE.accEditUser = null;
+  STATE.accEditField = null;
+  // 少し遅らせて再描画（onchangeが先に走るように）
+  setTimeout(function(){ if(STATE.accEditField===null) renderAccList(); }, 120);
+}
+
+// インライン編集の値を保存（既存 saveTag を流用）。保存後は編集状態を解除。
+function saveAccTag_(userId, field, value){
+  STATE.accEditUser = null;
+  STATE.accEditField = null;
+  saveTag(userId, field, value); // 内部で callGas('updateFriendTags')→renderAccList()
+}
+
+// 紐づけ用 生徒検索モーダル（未紐づけ→会員を検索して紐づける）
+function openLinkPicker_(userId){
+  var fr = STATE.friends.filter(function(f){ return f.userId===userId; })[0];
+  if (!fr) return;
+  closeLinkPicker_();
+  var ov = document.createElement('div');
+  ov.id = 'linkPicker';
+  ov.className = 'lp-overlay';
+  ov.onclick = function(e){ if (e.target===ov) closeLinkPicker_(); };
+  ov.innerHTML =
+    '<div class="lp-card" onclick="event.stopPropagation()">'
+    + '<div class="lp-head">「'+esc(fr.name||'')+'」を生徒に紐づける</div>'
+    + '<input class="lp-search" id="lpSearch" placeholder="生徒名・読みで検索" oninput="renderLinkPicker_(\''+esc(userId)+'\')">'
+    + '<div class="lp-list" id="lpList"></div>'
+    + '<div class="lp-foot"><button class="btn gray small" onclick="closeLinkPicker_()">閉じる</button></div>'
+    + '</div>';
+  document.body.appendChild(ov);
+  // 初期候補：友だちの入力名/表示名で自動絞り込み
+  var initQ = fr.inName || fr.name || '';
+  var inp = document.getElementById('lpSearch');
+  if (inp) inp.value = initQ;
+  renderLinkPicker_(userId);
+}
+
+function renderLinkPicker_(userId){
+  var list = document.getElementById('lpList');
+  if (!list) return;
+  var q = (document.getElementById('lpSearch').value||'').trim();
+  var base = STATE.members || [];
+  var scored = base.map(function(m){ return { m:m, score: matchScore(m, q) }; });
+  if (q) {
+    scored = scored.filter(function(x){ return x.score>0; }).sort(function(a,b){ return b.score-a.score; });
+  }
+  scored = scored.slice(0, 50); // 上限
+  if (!scored.length) {
+    list.innerHTML = '<div class="empty" style="padding:14px;">該当する生徒がいません</div>';
+    return;
+  }
+  list.innerHTML = scored.map(function(x){
+    var m = x.m;
+    var strong = x.score>=90 ? '<span class="acc-b acc-b-self">有力候補</span>' : '';
+    return '<div class="lp-item" onclick="confirmLink(\''+esc(userId)+'\',\''+esc(m.id)+'\',\''+esc(m.name)+'\')">'
+      + '<span class="acc-name">'+esc(m.name||'')+'</span> '
+      + '<span class="acc-b acc-b-mem">'+esc(normGrade_(m.grade||''))+'</span>'
+      + '<span class="acc-b acc-b-mem">'+esc(shortRoom_(m.classroom||''))+'</span>'
+      + '<span class="acc-b acc-b-status">'+esc(m.status||'')+'</span> '+strong
+      + '</div>';
+  }).join('');
+}
+
+function renderFriends_OLD_unused(){
   var el = $('friendList');
   $('friendCount').textContent = STATE.friends.length;
   if (!STATE.friends.length) { el.innerHTML = '<div class="empty">友だちがいません</div>'; return; }
@@ -436,9 +901,12 @@ function saveTag(userId, field, value){
       if (field==='level') fr.grade = '';
     }
     setStatus('タグを保存しました（'+new Date().toLocaleTimeString()+'）');
-    renderFriends();
+    renderAccList();
   }).catch(function(e){ setStatus(''); alert('タグ保存エラー: '+e.message); });
 }
+
+// 紐づけ用 生徒検索モーダル（A-②で実装）。今は仮（構文を通すため）。
+function closeLinkPicker_(){ var m=$('linkPicker'); if(m) m.remove(); }
 
 // 学年表記の正規化：'小学2年生'→'小2'、'中3'→'中3' など短縮形にそろえる
 function normGrade_(g){
@@ -461,7 +929,7 @@ function matchScore(member, q){
   return 0;
 }
 
-function renderMembers(){
+function renderMembers_OLD_unused(){
   var el = $('memberList');
   $('memberCount').textContent = STATE.members.length;
   if (!STATE.members.length) { el.innerHTML = '<div class="empty">生徒がいません</div>'; return; }
@@ -518,26 +986,21 @@ function renderMembers(){
   }).join('');
 }
 
-function selectFriend(userId){
-  STATE.selectedUserId = userId;
-  $('memberSearch').value = ''; // 友だち切替で手動検索クリア→表示名で自動絞り込み
-  renderFriends();
-  renderMembers();
-}
-
-function confirmLink(studentId, studentName){
-  var fr = selectedFriend();
-  if (!fr) { alert('左の友だちを選んでください'); return; }
+// 紐づけ実行（A-②のアコーディオン内ボタン→生徒検索モーダルから呼ぶ）
+function confirmLink(userId, studentId, studentName){
+  var fr = STATE.friends.filter(function(f){return f.userId===userId;})[0];
+  if (!fr) { alert('対象の友だちが見つかりません'); return; }
   var kind = fr.kind || prompt('この友だちは「保護者」か「生徒」か入力してください（保護者/生徒）', '生徒');
   if (kind !== '保護者' && kind !== '生徒') { alert('「保護者」か「生徒」で入力してください'); return; }
-  if (!confirm('LINE友だち「'+fr.name+'」を\n生徒「'+studentName+'」（'+studentId+'）に\n種別「'+kind+'」で紐づけます。よろしいですか？')) return;
+  if (!confirm('LINE友だち「'+(fr.name||'')+'」を\n生徒「'+studentName+'」（'+studentId+'）に\n種別「'+kind+'」で紐づけます。よろしいですか？')) return;
   setStatus('紐づけ中…');
   callGas('linkFriend', { userId: fr.userId, studentId: studentId, kind: kind })
     .then(function(r){
       if (!r.ok) throw new Error(r.error||'失敗');
-      // ローカル更新
       fr.studentId = studentId; fr.kind = kind;
-      renderFriends(); renderMembers();
+      closeLinkPicker_();
+      STATE.accOpenId = fr.userId;
+      renderAccList();
       setStatus('紐づけ完了：'+studentName);
     })
     .catch(function(e){ setStatus(''); alert('紐づけエラー: '+e.message); });
@@ -550,7 +1013,7 @@ function unlink(userId){
       if (!r.ok) throw new Error(r.error||'失敗');
       var fr = STATE.friends.filter(function(f){return f.userId===userId;})[0];
       if (fr) { fr.studentId=''; }
-      renderFriends(); renderMembers();
+      renderAccList();
       setStatus('紐づけ解除しました');
     })
     .catch(function(e){ alert('エラー: '+e.message); });
@@ -558,16 +1021,16 @@ function unlink(userId){
 
 function toggleSend(userId, on){
   setStatus('送信'+(on?'ON':'OFF')+'に変更中…（保存に数秒かかります）');
-  STATE._busy = userId; renderFriends();
+  STATE._busy = userId; renderAccList();
   callGas('setSendOn', { userId: userId, on: on })
     .then(function(r){
       if (!r.ok) throw new Error(r.error||'失敗');
       var fr = STATE.friends.filter(function(f){return f.userId===userId;})[0];
       if (fr) fr.sendOn = on;
-      STATE._busy = null; renderFriends();
+      STATE._busy = null; renderAccList();
       setStatus('✓ 送信'+(on?'ON':'OFF')+'に変更しました（'+new Date().toLocaleTimeString()+'）');
     })
-    .catch(function(e){ STATE._busy=null; renderFriends(); setStatus(''); alert('エラー: '+e.message); });
+    .catch(function(e){ STATE._busy=null; renderAccList(); setStatus(''); alert('エラー: '+e.message); });
 }
 
 function updateMemberHeading(fr, manualQ){
@@ -585,79 +1048,181 @@ function switchTab(t){
   document.getElementById('panelCast').classList.toggle('active', t==='cast');
   document.getElementById('tabBtnLink').classList.toggle('active', t==='link');
   document.getElementById('tabBtnCast').classList.toggle('active', t==='cast');
-}
-function syncBcGrade(){
-  var lv = document.getElementById('bcLevel').value;
-  var g = document.getElementById('bcGrade');
-  var opts = { '小学生':['小学1年生','小学2年生','小学3年生','小学4年生','小学5年生','小学6年生'],
-               '中学生':['中学1年生','中学2年生','中学3年生'],
-               '高校生':['高校1年生','高校2年生','高校3年生'] };
-  var list = opts[lv] || [];
-  g.innerHTML = '<option value="">すべて</option>' + list.map(function(x){return '<option>'+x+'</option>';}).join('');
+  if(t==='cast'){ renderBcFilter(); renderBcSelected(); }
 }
 function checkedVals(id){ return Array.prototype.slice.call(document.querySelectorAll('#'+id+' input[type=checkbox]:checked')).map(function(c){return c.value;}); }
-function bcCond(){
+
+/* ===== 一斉配信 刷新ロジック（2026-06-29）絞り込み（表示）と選択（送信対象）を分離 ===== */
+// STATE.bcSel = { userId: {manual:bool} } 選択中（送信対象）。フィルタを変えても保持。
+function bcEnsureState_(){ if(!STATE.bcSel) STATE.bcSel = {}; }
+
+// フィルタUI → 絞り込み条件
+function bcFilterCond(){
   var course=(document.querySelector('#bcCourse input:checked')||{}).value||'';
-  return { kinds:checkedVals('bcKind'), enrolls:checkedVals('bcEnroll'), grades:checkedVals('bcGrade'), course:course, options:checkedVals('bcOption') };
+  return {
+    kinds:    checkedVals('bcKind'),
+    statuses: checkedVals('bcStatus'),
+    rooms:    checkedVals('bcRoom'),
+    grades:   checkedVals('bcGrade'),
+    options:  checkedVals('bcOption'),
+    course:   course
+  };
 }
-function bcCount(btn){
-  if(!getGasUrl()||!getApiKey()){ alert('接続設定を入れてください'); return; }
-  document.getElementById('bcCountOut').textContent=''; document.getElementById('bcNameList').textContent='';
-  withBusy(btn, '確認中…', function(){
-    return callGas('countTargets',{cond:bcCond()}).then(function(r){
-      if(!r.ok) throw new Error(r.error||'失敗');
-      document.getElementById('bcCountOut').textContent='対象 '+r.count+' 人';
-      document.getElementById('bcNameList').innerHTML=(r.names&&r.names.length)?'宛先：'+r.names.map(esc).join('、'):'';
-    }).catch(function(e){ document.getElementById('bcCountOut').textContent=''; alert('エラー: '+e.message); });
+
+// 友だち1人の実効属性（状態/学年/教室）を返す。紐づけ済み＝会員管理が正、未紐づけ＝見込み客＋LINEタグ。
+function bcEffective_(fr){
+  var linked = !!fr.studentId;
+  var mem = linked ? memberById_(fr.studentId) : null;
+  if (linked && mem) return { status:String(mem.status||''), grade:String(mem.grade||''), room:String(mem.classroom||''),
+                              attrJuku:!!mem.attrJuku, attrCa:!!mem.attrCa, options:(mem.options||[]) };
+  if (linked) return { status:'会員情報なし', grade:'', room:'', attrJuku:false, attrCa:false, options:[] };
+  return { status:'見込み客', grade:String(fr.grade||''), room:String(fr.room||''), attrJuku:false, attrCa:false, options:[] };
+}
+
+// 絞り込み条件に合う友だちを返す（クライアント側・対象確認や表示に使う）
+function bcFilteredFriends(){
+  var c = bcFilterCond();
+  return (STATE.friends||[]).filter(function(fr){
+    var e = bcEffective_(fr);
+    if (c.kinds.length    && c.kinds.indexOf(String(fr.kind||''))<0) return false;
+    if (c.statuses.length && c.statuses.indexOf(e.status)<0) return false;
+    if (c.grades.length   && c.grades.indexOf(e.grade)<0) return false;
+    if (c.rooms.length    && c.rooms.indexOf(e.room)<0) return false;
+    if ((c.course && c.course!=='') || c.options.length){
+      if (!fr.studentId) return false; // コース/オプションは紐づけ済みのみ
+      if (c.course==='juku' && !e.attrJuku) return false;
+      if (c.course==='ca'   && !e.attrCa)   return false;
+      if (c.options.length){ var hit=c.options.some(function(o){return e.options.indexOf(o)>=0;}); if(!hit) return false; }
+    }
+    return true;
   });
 }
+
+// 友だちの表示名（紐づけ済み＝会員名、未紐づけ＝LINE名）
+function bcName_(fr){
+  var d = accDisplay_(fr);
+  return d.name || fr.name || '(名前なし)';
+}
+
+// 絞り込み結果リストを描画
+function renderBcFilter(){
+  bcEnsureState_();
+  var el = $('bcResultList'); if(!el) return;
+  var list = bcFilteredFriends();
+  $('bcResultCount').textContent = '絞り込み結果 '+list.length+'名';
+  if(!list.length){ el.innerHTML = '<div class="empty" style="padding:14px;">条件に合う友だちがいません</div>'; return; }
+  el.innerHTML = list.map(function(fr){
+    var uid = esc(fr.userId);
+    var checked = STATE.bcSel[fr.userId] ? ' checked' : '';
+    var e = bcEffective_(fr);
+    var meta = [normGrade_(e.grade), shortRoom_(e.room), (e.status&&e.status!=='見込み客'?e.status:'見込み客')].filter(Boolean).join(' ');
+    return '<label class="bc2-rrow"><input type="checkbox"'+checked+' onchange="bcToggleSelect(\''+uid+'\',this.checked)"> '
+      + '<span>'+esc(bcName_(fr))+'</span><span class="bc2-rmeta">'+esc(meta)+'</span></label>';
+  }).join('');
+}
+
+// 選択中リストを描画＋件数＋送信ボタン文言更新
+function renderBcSelected(){
+  bcEnsureState_();
+  var el = $('bcSelList'); if(!el) return;
+  var ids = Object.keys(STATE.bcSel);
+  $('bcSelCount').textContent = ids.length;
+  var btn = $('bcSendBtn'); if(btn) btn.textContent = ids.length + (bcMode()==='reserve'?'名に予約':'名に送信');
+  if(!ids.length){ el.innerHTML = '<div class="empty" style="padding:10px;">まだ選択がありません</div>'; return; }
+  el.innerHTML = ids.map(function(uid){
+    var fr = (STATE.friends||[]).filter(function(f){return f.userId===uid;})[0];
+    var manual = STATE.bcSel[uid] && STATE.bcSel[uid].manual;
+    var name = fr ? bcName_(fr) : '(不明)';
+    var e = fr ? bcEffective_(fr) : {grade:'',status:''};
+    var meta = [normGrade_(e.grade), (manual?'手動追加':(e.status&&e.status!=='見込み客'?e.status:''))].filter(Boolean).join(' ');
+    return '<div class="bc2-chip'+(manual?' manual':'')+'"><input type="checkbox" checked onchange="bcRemoveSelect(\''+esc(uid)+'\')"> '
+      + '<span>'+esc(name)+'</span><span class="bc2-chip-meta">'+esc(meta)+'</span></div>';
+  }).join('');
+}
+
+// 絞り込み結果のチェックで選択へ出し入れ
+function bcToggleSelect(userId, on){
+  bcEnsureState_();
+  if(on){ if(!STATE.bcSel[userId]) STATE.bcSel[userId] = { manual:false }; }
+  else { delete STATE.bcSel[userId]; }
+  renderBcSelected();
+}
+
+// 表示中を全て選択に追加
+function bcAddAllShown(){
+  bcEnsureState_();
+  bcFilteredFriends().forEach(function(fr){ if(!STATE.bcSel[fr.userId]) STATE.bcSel[fr.userId] = { manual:false }; });
+  renderBcFilter(); renderBcSelected();
+}
+
+// 選択中から外す
+function bcRemoveSelect(userId){
+  bcEnsureState_();
+  delete STATE.bcSel[userId];
+  renderBcFilter(); renderBcSelected();
+}
+
 function bcMode(){ return (document.querySelector('#bcMode input:checked')||{}).value||'now'; }
 function updateModeUI(){
   var reserve = bcMode()==='reserve';
-  document.getElementById('bcWhenWrap').style.display = reserve ? 'block' : 'none';
-  document.getElementById('bcSendBtn').textContent = reserve ? 'この条件で予約する' : 'この条件で今すぐ送信';
+  var w = document.getElementById('bcWhenWrap'); if(w) w.style.display = reserve ? 'inline-block' : 'none';
+  renderBcSelected(); // ボタン文言を更新
 }
-// 送信ボタン：モードに応じて即時送信 or 予約に振り分ける（btnは処理中表示・連打防止用）
-function bcSubmit(btn){ if(bcMode()==='reserve'){ bcReserve(btn); } else { bcSend(btn); } }
-function bcSend(btn){
+// 送信確認パネルを開く（宛先＝選択中・本文プレビュー）。ここでは送らない。
+function bcOpenConfirm(){
+  bcEnsureState_();
   if(!getGasUrl()||!getApiKey()){ alert('接続設定を入れてください'); return; }
+  var ids = Object.keys(STATE.bcSel);
+  if(!ids.length){ alert('送信先が0人です。左の絞り込み結果から選んでください'); return; }
   var text=(document.getElementById('bcText').value||'').trim();
   if(!text){ alert('本文を入力してください'); return; }
-  // 確認ダイアログはbusyに入れる前に出す（OKしてから処理中表示に切り替え）
-  withBusy(btn, '送信中…', function(){
-    return callGas('countTargets',{cond:bcCond()}).then(function(r){
-      if(!r.ok) throw new Error(r.error||'失敗');
-      if(r.count===0){ alert('対象者が0人です。条件を見直してください'); return; }
-      var preview=(r.names||[]).slice(0,30).join('、');
-      if(!confirm('この条件で '+r.count+' 人に送信します。\n\n宛先：'+preview+(r.count>30?' ほか':'')+'\n\nよろしいですか？')) return;
-      document.getElementById('bcCountOut').textContent='送信中…';
-      return callGas('broadcast',{cond:bcCond(), text:text, condSummary:condSummary()}).then(function(b){
-        if(!b.ok) throw new Error(b.error||'失敗');
-        document.getElementById('bcCountOut').textContent='✓ 送信完了：成功'+b.sent+' / 失敗'+b.failed+'（計'+b.total+'）'; loadCastHistory();
-      });
-    }).catch(function(e){ document.getElementById('bcCountOut').textContent=''; alert('送信エラー: '+e.message); });
+  var reserve = bcMode()==='reserve';
+  var when = '';
+  if(reserve){
+    when=(document.getElementById('bcWhen').value||'').trim();
+    if(!when){ alert('送信予定日時を入れてください'); return; }
+    if(new Date(when).getTime() <= Date.now()){ alert('送信予定日時は現在より後にしてください'); return; }
+  }
+  // 宛先名リスト
+  var names = ids.map(function(uid){
+    var fr=(STATE.friends||[]).filter(function(f){return f.userId===uid;})[0];
+    return fr ? bcName_(fr) : uid;
   });
+  $('bcConfirmCount').textContent = ids.length;
+  $('bcConfirmTo').textContent = names.join(' ／ ');
+  $('bcConfirmBody').textContent = text;
+  $('bcConfirmTitle').textContent = reserve ? '⏰ この内容で予約しますか？' : '⚠️ この内容で送信しますか？';
+  var whenEl = $('bcConfirmWhen');
+  if(reserve){ whenEl.style.display='block'; whenEl.textContent = '予約日時：'+when.replace('T',' ').slice(0,16); }
+  else { whenEl.style.display='none'; }
+  $('bcConfirmSend').textContent = reserve ? '✓ この内容で予約' : '✓ この内容で送信';
+  $('bcConfirm').style.display='flex';
 }
-// datetime-local の 'YYYY-MM-DDTHH:mm' を 'YYYY-MM-DD HH:mm' に整える
-function bcReserve(btn){
-  if(!getGasUrl()||!getApiKey()){ alert('接続設定を入れてください'); return; }
+function bcCloseConfirm(){ $('bcConfirm').style.display='none'; }
+
+// 確認パネルで確定→実送信（即時 or 予約）。選択中のuserIdリストを送る。
+function bcDoSend(btn){
+  bcEnsureState_();
+  var ids = Object.keys(STATE.bcSel);
+  if(!ids.length){ bcCloseConfirm(); return; }
   var text=(document.getElementById('bcText').value||'').trim();
-  if(!text){ alert('本文を入力してください'); return; }
-  var when=(document.getElementById('bcWhen').value||'').trim();
-  if(!when){ alert('送信予定日時を入れてください'); return; }
-  var whenStr = when.replace('T',' ').slice(0,16);
-  if(new Date(when).getTime() <= Date.now()){ alert('送信予定日時は現在より後にしてください'); return; }
-  withBusy(btn, '予約中…', function(){
-    // 予約時点の対象人数も見せる（送信時に再判定されるので参考値）
-    return callGas('countTargets',{cond:bcCond()}).then(function(r){
-      if(!r.ok) throw new Error(r.error||'失敗');
-      if(!confirm('【'+whenStr+'】にこの条件で送信を予約します。\n\n現時点の対象：'+r.count+'人（実際の人数は送信時に再判定されます）\n\nよろしいですか？')) return;
-      document.getElementById('bcCountOut').textContent='予約中…';
-      return callGas('reserveCast',{cond:bcCond(), text:text, condSummary:condSummary(), when:whenStr}).then(function(b){
+  var reserve = bcMode()==='reserve';
+  var summary = '選択送信 '+ids.length+'名';
+  withBusy(btn, reserve?'予約中…':'送信中…', function(){
+    if(reserve){
+      var when=(document.getElementById('bcWhen').value||'').trim().replace('T',' ').slice(0,16);
+      return callGas('reserveCastToUsers',{ userIds:ids, text:text, when:when, condSummary:summary }).then(function(b){
         if(!b.ok) throw new Error(b.error||'失敗');
-        document.getElementById('bcCountOut').textContent='✓ 予約しました（'+b.when+'）'; loadReservations();
-      });
-    }).catch(function(e){ document.getElementById('bcCountOut').textContent=''; alert('予約エラー: '+e.message); });
+        bcCloseConfirm(); setStatus('✓ 予約しました（'+b.when+'）'); loadReservations();
+      }).catch(function(e){ alert('予約エラー: '+e.message); });
+    }
+    return callGas('broadcastToUsers',{ userIds:ids, text:text, condSummary:summary }).then(function(b){
+      if(!b.ok) throw new Error(b.error||'失敗');
+      bcCloseConfirm();
+      setStatus('✓ 送信完了：成功'+b.sent+' / 失敗'+b.failed+'（計'+b.total+'）');
+      STATE.bcSel = {}; renderBcFilter(); renderBcSelected();
+      loadCastHistory();
+    }).catch(function(e){ alert('送信エラー: '+e.message); });
   });
 }
 function loadReservations(){
@@ -694,15 +1259,6 @@ function dupReserve(i){
   if(h.when){ document.getElementById('bcWhen').value = String(h.when).replace(' ','T').slice(0,16); }
   window.scrollTo(0,0);
 }
-function condSummary(){
-  var c=bcCond(); var p=[];
-  if(c.kinds.length) p.push(c.kinds.join('・'));
-  if(c.enrolls.length) p.push(c.enrolls.join('・'));
-  if(c.grades.length) p.push(c.grades.map(function(g){return g.replace('学','').replace('年生','');}).join('・'));
-  if(c.course==='juku') p.push('塾生'); if(c.course==='ca') p.push('CA生');
-  if(c.options.length) p.push(c.options.map(function(o){return o==='eiken'?'英検':'受験特訓';}).join('・'));
-  return p.length? p.join(' / ') : '全員';
-}
 function loadCastHistory(){
   if(!getGasUrl()||!getApiKey()) return;
   callGas('getCastHistory',{}).then(function(r){
@@ -719,21 +1275,17 @@ function loadCastHistory(){
     }).join('');
   });
 }
+// 複製：本文だけを引き継いで一斉配信タブを開く（選択分離UIになったので宛先は選び直す）。
 function applyCondToForm(c, text){
   switchTab('cast');
-  function setChecks(id, vals){ document.querySelectorAll('#'+id+' input[type=checkbox]').forEach(function(ck){ ck.checked = (vals||[]).indexOf(ck.value)>=0; }); }
-  c=c||{};
-  setChecks('bcKind', c.kinds); setChecks('bcEnroll', c.enrolls); setChecks('bcGrade', c.grades); setChecks('bcOption', c.options);
-  document.querySelectorAll('#bcCourse input').forEach(function(r){ r.checked = (r.value===(c.course||'')); });
   document.getElementById('bcText').value = text||'';
-  document.getElementById('bcCountOut').textContent=''; document.getElementById('bcNameList').textContent='';
 }
 function dupCast(i){
   var h=(window._castHist||[])[i]; if(!h) return;
   applyCondToForm(h.cond||{}, h.text||'');
-  // 履歴からの複製は即時モードに戻す
   document.querySelectorAll('#bcMode input').forEach(function(r){ r.checked=(r.value==='now'); });
   updateModeUI();
+  alert('本文を引き継ぎました。宛先は左の絞り込みから選び直してください。');
   window.scrollTo(0,0);
 }
 function toggleSettings(){
