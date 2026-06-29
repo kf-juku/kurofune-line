@@ -186,10 +186,21 @@ header .sub { font-size: 12px; opacity: 0.85; }
 /* 絞り込みパネル（折りたたみ） */
 .acc-filters { display:none; padding:8px 10px; background:#EFF1F0; border-radius:8px; margin-bottom:10px; }
 .acc-filters.show { display:block; }
-.acc-bulk { margin-top:8px; padding-top:8px; border-top:1px solid #dfe3e0; }
-.acc-bulk-head { font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px; }
-.acc-bulk-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.acc-bulk-target { font-size:12px; color:var(--text-muted); margin-right:auto; }
+/* 自動通知 一括バー（絞り込み外・常時表示） */
+.acc-bulk { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:9px 12px; background:#EAF6FF; border:1px solid #BBD9F2; border-radius:8px; margin-bottom:10px; }
+.acc-bulk-head { font-size:13px; font-weight:700; color:#185FA5; }
+.acc-bulk-stat { font-size:12px; color:#444; }
+.acc-bulk-stat b.on { color:#0e9f72; } .acc-bulk-stat b.off { color:#8a8f98; }
+.acc-bulk-actions { margin-left:auto; display:flex; gap:8px; }
+/* 行トグルスイッチ */
+.acc-tg { display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
+.acc-tg-label { font-size:10px; color:var(--text-light); }
+.acc-sw { position:relative; width:38px; height:20px; border-radius:10px; background:#cfd4da; transition:.15s; flex:none; }
+.acc-sw.on { background:var(--green); }
+.acc-sw::after { content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:white; transition:.15s; box-shadow:0 1px 2px rgba(0,0,0,.3); }
+.acc-sw.on::after { left:20px; }
+.acc-tg-state { font-size:11px; font-weight:600; width:26px; }
+.acc-tg-state.on { color:#0e9f72; } .acc-tg-state.off { color:#9aa0a6; }
 /* 紐づけ用 生徒検索モーダル */
 .lp-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:flex-start; justify-content:center; z-index:200; padding:40px 16px; }
 .lp-card { background:white; border-radius:12px; padding:16px; width:100%; max-width:420px; box-shadow:var(--shadow); }
@@ -294,15 +305,15 @@ header .sub { font-size: 12px; opacity: 0.85; }
       <div class="bc-group"><div class="bc-glabel">教室</div><div class="bc-checks" id="afRoom"><label><input type="checkbox" value="北久里浜教室" onchange="renderAccList()">北久里浜</label><label><input type="checkbox" value="京急久里浜駅前教室" onchange="renderAccList()">京急久里浜駅前</label></div></div>
       <div class="bc-group"><div class="bc-glabel">学年</div><div class="bc-checks" id="afGrade"><label><input type="checkbox" value="小学1年生" onchange="renderAccList()">小1</label><label><input type="checkbox" value="小学2年生" onchange="renderAccList()">小2</label><label><input type="checkbox" value="小学3年生" onchange="renderAccList()">小3</label><label><input type="checkbox" value="小学4年生" onchange="renderAccList()">小4</label><label><input type="checkbox" value="小学5年生" onchange="renderAccList()">小5</label><label><input type="checkbox" value="小学6年生" onchange="renderAccList()">小6</label><label><input type="checkbox" value="中学1年生" onchange="renderAccList()">中1</label><label><input type="checkbox" value="中学2年生" onchange="renderAccList()">中2</label><label><input type="checkbox" value="中学3年生" onchange="renderAccList()">中3</label><label><input type="checkbox" value="高校1年生" onchange="renderAccList()">高1</label><label><input type="checkbox" value="高校2年生" onchange="renderAccList()">高2</label><label><input type="checkbox" value="高校3年生" onchange="renderAccList()">高3</label></div></div>
       <div style="text-align:right;"><button class="btn gray small" onclick="clearAccFilters()">絞り込みをクリア</button></div>
-      <!-- 自動通知の一括設定（この絞り込み対象に一括適用） -->
-      <div class="acc-bulk">
-        <div class="acc-bulk-head">🔔 自動通知の一括設定<span class="help-chip" data-tip="上の絞り込みで対象を決めて、その対象の自動通知をまとめてON/OFFします。例：種別=保護者で全員OFF→種別=生徒・学年=中1中2中3で全員ON。自動通知＝他ツール（現在はクロフネオンラインの遅刻検知）からの個別通知の許可です。">?</span></div>
-        <div class="acc-bulk-row">
-          <span class="acc-bulk-target" id="accBulkTarget">対象：絞り込みを選んでください</span>
-          <button class="btn small" onclick="bulkSendOn(true, this)">対象を全員ON</button>
-          <button class="btn gray small" onclick="bulkSendOn(false, this)">対象を全員OFF</button>
-        </div>
-      </div>
+    </div>
+    <!-- 自動通知の一括バー（絞り込みの外・常時表示。対象＝今表示中の人だけ） -->
+    <div class="acc-bulk" id="accBulkBar">
+      <span class="acc-bulk-head">🔔 自動通知<span class="help-chip" data-tip="行のスイッチで1人ずつON/OFFできます。右の『全員ON/全員OFF』は今表示中（絞り込んだ対象）だけに一括適用します。画面に出ていない人には絶対に反映しません。押すと確認パネルが出ます。自動通知＝他ツール（現在はクロフネオンラインの遅刻検知）からの個別通知の許可です。">?</span></span>
+      <span class="acc-bulk-stat" id="accBulkStat">—</span>
+      <span class="acc-bulk-actions">
+        <button class="btn small" onclick="bulkSendOn(true, this)">全員ON</button>
+        <button class="btn gray small" onclick="bulkSendOn(false, this)">全員OFF</button>
+      </span>
     </div>
     <!-- コンパクト一覧 -->
     <div class="acc-list" id="accList"><div class="empty">接続設定（⚙️）を入れてください</div></div>
@@ -595,11 +606,18 @@ function renderAccList(){
       } else {
         rightExtra += '<span class="acc-cand-none">候補なし</span>';
       }
-      rightExtra += '<button class="acc-linkbtn" onclick="event.stopPropagation();openLinkPicker_(\''+esc(fr.userId)+'\')">紐づけ</button>';
+      // 開いている行は詳細内に紐づけボタンがあるので、行右端のボタンは出さない（重複防止）。
+      if (!open) rightExtra += '<button class="acc-linkbtn" onclick="event.stopPropagation();openLinkPicker_(\''+esc(fr.userId)+'\')">紐づけ</button>';
     }
+    // 自動通知トグル（行で1人ずつ即ON/OFF。stopPropagationで行展開と暴発しない）
+    var on = !!fr.sendOn;
+    var tg = '<span class="acc-tg" onclick="event.stopPropagation();toggleSend(\''+esc(fr.userId)+'\','+(!on)+')">'
+      + '<span class="acc-tg-label">自動通知</span>'
+      + '<span class="acc-sw'+(on?' on':'')+'"></span>'
+      + '<span class="acc-tg-state '+(on?'on':'off')+'">'+(on?'ON':'OFF')+'</span></span>';
     var rt = !fr.studentId
-      ? rightExtra + '<span class="acc-rt unlinked">未紐づけ '+(open?'▴':'▾')+'</span>'
-      : '<span class="acc-rt">紐づけ済 '+(open?'▴':'▾')+'</span>';
+      ? rightExtra + tg + '<span class="acc-rt unlinked">未紐づけ '+(open?'▴':'▾')+'</span>'
+      : tg + '<span class="acc-rt">紐づけ済 '+(open?'▴':'▾')+'</span>';
     var rowHtml = '<div class="acc-row'+(open?' open':'')+'" onclick="toggleAccRow(\''+esc(fr.userId)+'\')">'
       + '<span class="acc-name">'+esc(d.name)+'</span>'
       + badges + '<span class="acc-rwrap">' + rt + '</span></div>';
@@ -644,10 +662,14 @@ function clearAccFilters(){
 }
 
 // 一括設定の対象表示を更新（今表示中の友だち数）。
+// 一括バーの内訳表示（今表示中の ON/OFF 件数）。
 function updateBulkTarget_(){
-  var el = $('accBulkTarget'); if(!el) return;
-  var n = (STATE.accBulkRows||[]).length;
-  el.textContent = '対象：今表示中の ' + n + ' 名';
+  var el = $('accBulkStat'); if(!el) return;
+  var rows = STATE.accBulkRows||[];
+  var n = rows.length;
+  var onCount = rows.filter(function(fr){ return !!fr.sendOn; }).length;
+  var offCount = n - onCount;
+  el.innerHTML = '今表示中 '+n+'名：<b class="on">ON '+onCount+'</b> / <b class="off">OFF '+offCount+'</b>';
 }
 
 // 自動通知を一括ON/OFF（今表示中の対象に適用）。確認をはさんでから setSendOnBulk を呼ぶ。
@@ -655,10 +677,11 @@ function bulkSendOn(on, btn){
   if(!getGasUrl()||!getApiKey()){ alert('接続設定を入れてください'); return; }
   var rows = STATE.accBulkRows || [];
   if(!rows.length){ alert('対象がいません。絞り込みを確認してください'); return; }
+  // 対象は「この瞬間に表示中の人」だけに固定（確認後に絞り込みを変えても、このidsにしか反映しない）。
   var ids = rows.map(function(fr){ return fr.userId; });
   var names = rows.map(function(fr){ return accDisplay_(fr).name||fr.name||''; });
-  var preview = names.slice(0,30).join('、') + (names.length>30?' ほか':'');
-  if(!confirm('今表示中の ' + ids.length + ' 名を、自動通知' + (on?'ON':'OFF') + 'にします。\n\n対象：' + preview + '\n\nよろしいですか？')) return;
+  var preview = names.slice(0,30).join('、') + (names.length>30 ? ('　ほか'+(names.length-30)+'名') : '');
+  if(!confirm('今表示中の ' + ids.length + ' 名だけを、自動通知' + (on?'ON':'OFF') + 'にします。\n（画面に出ていない人には反映しません）\n\n対象：' + preview + '\n\nよろしいですか？')) return;
   withBusy(btn, '更新中…', function(){
     return callGas('setSendOnBulk', { userIds: ids, on: on }).then(function(r){
       if(!r || !r.ok) throw new Error((r&&r.error)||'失敗');
