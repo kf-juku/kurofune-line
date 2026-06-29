@@ -161,8 +161,14 @@ header .sub { font-size: 12px; opacity: 0.85; }
 .acc-b-self { background:#FAEEDA; color:#854F0B; }
 .acc-b-line { background:#D3D1C7; color:#2C2C2A; }
 .acc-b-status { background:#F1EFE8; color:#5F5E5A; }
-.acc-rt { margin-left:auto; font-size:11px; color:var(--text-light); white-space:nowrap; }
+.acc-rwrap { margin-left:auto; display:flex; align-items:center; gap:8px; }
+.acc-rt { font-size:11px; color:var(--text-light); white-space:nowrap; }
 .acc-rt.unlinked { color:#854F0B; }
+/* 紐づけ候補表示＋行内ボタン（2026-06-29） */
+.acc-cand { font-size:11px; color:#0F6E56; background:#E1F5EE; border:1px solid #A6E0CC; border-radius:10px; padding:2px 8px; white-space:nowrap; }
+.acc-cand-none { font-size:11px; color:var(--text-light); white-space:nowrap; }
+.acc-linkbtn { font-size:11px; padding:4px 12px; border:none; border-radius:6px; background:var(--green); color:white; cursor:pointer; font-weight:600; white-space:nowrap; }
+.acc-linkbtn:hover { background:var(--green-dark); }
 /* アコーディオン詳細 */
 .acc-detail { padding:0 12px 12px; font-size:12px; background:#F7FAF8; border-bottom:1px solid #eef0f3; }
 .acc-detail-head { font-size:10px; margin:8px 0 6px; }
@@ -180,6 +186,10 @@ header .sub { font-size: 12px; opacity: 0.85; }
 /* 絞り込みパネル（折りたたみ） */
 .acc-filters { display:none; padding:8px 10px; background:#EFF1F0; border-radius:8px; margin-bottom:10px; }
 .acc-filters.show { display:block; }
+.acc-bulk { margin-top:8px; padding-top:8px; border-top:1px solid #dfe3e0; }
+.acc-bulk-head { font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px; }
+.acc-bulk-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.acc-bulk-target { font-size:12px; color:var(--text-muted); margin-right:auto; }
 /* 紐づけ用 生徒検索モーダル */
 .lp-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:flex-start; justify-content:center; z-index:200; padding:40px 16px; }
 .lp-card { background:white; border-radius:12px; padding:16px; width:100%; max-width:420px; box-shadow:var(--shadow); }
@@ -284,6 +294,15 @@ header .sub { font-size: 12px; opacity: 0.85; }
       <div class="bc-group"><div class="bc-glabel">教室</div><div class="bc-checks" id="afRoom"><label><input type="checkbox" value="北久里浜教室" onchange="renderAccList()">北久里浜</label><label><input type="checkbox" value="京急久里浜駅前教室" onchange="renderAccList()">京急久里浜駅前</label></div></div>
       <div class="bc-group"><div class="bc-glabel">学年</div><div class="bc-checks" id="afGrade"><label><input type="checkbox" value="小学1年生" onchange="renderAccList()">小1</label><label><input type="checkbox" value="小学2年生" onchange="renderAccList()">小2</label><label><input type="checkbox" value="小学3年生" onchange="renderAccList()">小3</label><label><input type="checkbox" value="小学4年生" onchange="renderAccList()">小4</label><label><input type="checkbox" value="小学5年生" onchange="renderAccList()">小5</label><label><input type="checkbox" value="小学6年生" onchange="renderAccList()">小6</label><label><input type="checkbox" value="中学1年生" onchange="renderAccList()">中1</label><label><input type="checkbox" value="中学2年生" onchange="renderAccList()">中2</label><label><input type="checkbox" value="中学3年生" onchange="renderAccList()">中3</label><label><input type="checkbox" value="高校1年生" onchange="renderAccList()">高1</label><label><input type="checkbox" value="高校2年生" onchange="renderAccList()">高2</label><label><input type="checkbox" value="高校3年生" onchange="renderAccList()">高3</label></div></div>
       <div style="text-align:right;"><button class="btn gray small" onclick="clearAccFilters()">絞り込みをクリア</button></div>
+      <!-- 自動通知の一括設定（この絞り込み対象に一括適用） -->
+      <div class="acc-bulk">
+        <div class="acc-bulk-head">🔔 自動通知の一括設定<span class="help-chip" data-tip="上の絞り込みで対象を決めて、その対象の自動通知をまとめてON/OFFします。例：種別=保護者で全員OFF→種別=生徒・学年=中1中2中3で全員ON。自動通知＝他ツール（現在はクロフネオンラインの遅刻検知）からの個別通知の許可です。">?</span></div>
+        <div class="acc-bulk-row">
+          <span class="acc-bulk-target" id="accBulkTarget">対象：絞り込みを選んでください</span>
+          <button class="btn small" onclick="bulkSendOn(true, this)">対象を全員ON</button>
+          <button class="btn gray small" onclick="bulkSendOn(false, this)">対象を全員OFF</button>
+        </div>
+      </div>
     </div>
     <!-- コンパクト一覧 -->
     <div class="acc-list" id="accList"><div class="empty">接続設定（⚙️）を入れてください</div></div>
@@ -551,6 +570,10 @@ function renderAccList(){
     rows = rows.slice().sort(function(a,b){ return gradeRank_(accDisplay_(a).grade) - gradeRank_(accDisplay_(b).grade); });
   } // reg=新規登録順＝配列順（シート行順）のまま
 
+  // 一括設定の対象＝今表示中（タブ＋検索＋絞り込み後）の友だち。STATEに保持してbulkSendOnで使う。
+  STATE.accBulkRows = rows.slice();
+  updateBulkTarget_();
+
   if (!rows.length){ el.innerHTML = '<div class="empty">該当する友だちがいません</div>'; return; }
 
   el.innerHTML = rows.map(function(fr){
@@ -561,12 +584,25 @@ function renderAccList(){
     if (d.grade) badges += '<span class="acc-b '+bCls+'">'+esc(normGrade_(d.grade))+'</span>';
     if (d.room)  badges += '<span class="acc-b '+bCls+'">'+esc(shortRoom_(d.room))+'</span>';
     if (d.status && d.status!=='見込み客') badges += '<span class="acc-b acc-b-status">'+esc(d.status)+'</span>';
+    // 未紐づけ行：紐づけ候補表示＋行内「紐づけ」ボタン（開かなくても紐づけできる）
+    var rightExtra = '';
+    if (!fr.studentId){
+      var cands = friendCandidates_(fr, 5);
+      if (cands.length){
+        var top = cands[0];
+        var label = cands.length>1 ? ('候補: '+esc(top.m.name||'')+' ほか'+(cands.length-1)+'件') : ('候補: '+esc(top.m.name||''));
+        rightExtra += '<span class="acc-cand">'+label+'</span>';
+      } else {
+        rightExtra += '<span class="acc-cand-none">候補なし</span>';
+      }
+      rightExtra += '<button class="acc-linkbtn" onclick="event.stopPropagation();openLinkPicker_(\''+esc(fr.userId)+'\')">紐づけ</button>';
+    }
     var rt = !fr.studentId
-      ? '<span class="acc-rt unlinked">未紐づけ '+(open?'▴':'▾')+'</span>'
+      ? rightExtra + '<span class="acc-rt unlinked">未紐づけ '+(open?'▴':'▾')+'</span>'
       : '<span class="acc-rt">紐づけ済 '+(open?'▴':'▾')+'</span>';
     var rowHtml = '<div class="acc-row'+(open?' open':'')+'" onclick="toggleAccRow(\''+esc(fr.userId)+'\')">'
       + '<span class="acc-name">'+esc(d.name)+'</span>'
-      + badges + rt + '</div>';
+      + badges + '<span class="acc-rwrap">' + rt + '</span></div>';
     var detail = open ? accDetailHtml_(fr) : '';
     return rowHtml + detail;
   }).join('');
@@ -605,6 +641,33 @@ function clearAccFilters(){
     document.querySelectorAll('#'+id+' input[type=checkbox]').forEach(function(c){ c.checked=false; });
   });
   renderAccList();
+}
+
+// 一括設定の対象表示を更新（今表示中の友だち数）。
+function updateBulkTarget_(){
+  var el = $('accBulkTarget'); if(!el) return;
+  var n = (STATE.accBulkRows||[]).length;
+  el.textContent = '対象：今表示中の ' + n + ' 名';
+}
+
+// 自動通知を一括ON/OFF（今表示中の対象に適用）。確認をはさんでから setSendOnBulk を呼ぶ。
+function bulkSendOn(on, btn){
+  if(!getGasUrl()||!getApiKey()){ alert('接続設定を入れてください'); return; }
+  var rows = STATE.accBulkRows || [];
+  if(!rows.length){ alert('対象がいません。絞り込みを確認してください'); return; }
+  var ids = rows.map(function(fr){ return fr.userId; });
+  var names = rows.map(function(fr){ return accDisplay_(fr).name||fr.name||''; });
+  var preview = names.slice(0,30).join('、') + (names.length>30?' ほか':'');
+  if(!confirm('今表示中の ' + ids.length + ' 名を、自動通知' + (on?'ON':'OFF') + 'にします。\n\n対象：' + preview + '\n\nよろしいですか？')) return;
+  withBusy(btn, '更新中…', function(){
+    return callGas('setSendOnBulk', { userIds: ids, on: on }).then(function(r){
+      if(!r || !r.ok) throw new Error((r&&r.error)||'失敗');
+      // ローカル STATE も更新
+      rows.forEach(function(fr){ fr.sendOn = on; });
+      renderAccList();
+      setStatus('✓ ' + (r.updated!=null?r.updated:ids.length) + ' 名を自動通知' + (on?'ON':'OFF') + 'にしました（'+new Date().toLocaleTimeString()+'）');
+    }).catch(function(e){ alert('一括設定エラー: '+e.message); });
+  });
 }
 
 // 行クリックで詳細展開／閉じる
@@ -930,6 +993,38 @@ function matchScore(member, q){
   // 姓だけ一致（最初の1〜2文字）
   if (q.length >= 2 && name.indexOf(q.slice(0,2)) === 0) return 30;
   return 0;
+}
+
+// 友だち×会員 の候補スコア（紐づけ候補の優先順位・2026-06-29）。
+// 照合名はアンケート入力名(inName)優先、無ければLINE表示名。学年は未紐づけ友だちのLINEタグ学年。
+// 優先順位：①入力名フルネーム一致＋学年一致(最有力) ②入力名フルネーム一致 ③名前の一部一致/読み近似。
+function candidateScore_(fr, m){
+  var fname = String(fr.inName || fr.name || '').replace(/\s/g,'');
+  if (!fname) return 0;
+  var mname = String(m.name || '').replace(/\s/g,'');
+  var mread = String(m.reading || '').replace(/\s/g,'');
+  var fgrade = String(fr.grade || '');
+  var mgrade = String(m.grade || '');
+  var gradeMatch = (fgrade && mgrade && fgrade === mgrade);
+  // フルネーム一致
+  if (fname === mname || (mread && fname === mread)) {
+    return gradeMatch ? 100 : 80; // ①学年も一致＝最有力 ②名前のみ
+  }
+  // 部分一致（どちらかに含まれる）＋読み一致
+  if (mname.indexOf(fname) >= 0 || fname.indexOf(mname) >= 0) return 50;
+  if (mread && (mread.indexOf(fname) >= 0 || fname.indexOf(mread) >= 0)) return 45;
+  // 姓だけ一致（先頭2文字）
+  if (fname.length >= 2 && mname.indexOf(fname.slice(0,2)) === 0) return 30;
+  return 0;
+}
+
+// 未紐づけ友だちの紐づけ候補をスコア順で返す（上位のみ）。
+function friendCandidates_(fr, limit){
+  if (fr.studentId) return []; // 紐づけ済みは候補不要
+  var scored = (STATE.members||[]).map(function(m){ return { m:m, score: candidateScore_(fr, m) }; })
+    .filter(function(x){ return x.score > 0; })
+    .sort(function(a,b){ return b.score - a.score; });
+  return limit ? scored.slice(0, limit) : scored;
 }
 
 function renderMembers_OLD_unused(){
