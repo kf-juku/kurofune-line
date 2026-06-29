@@ -619,10 +619,13 @@ function accDetailHtml_(fr){
   var uid = esc(fr.userId);
   var linked = !!fr.studentId;
   var busy = (STATE._busy === fr.userId);
+  // ホバー説明（B案）：自動通知＝他ツールからの個別通知の共通許可（現在はクロフネオンラインの遅刻検知が利用）
+  var sendTip = '他ツールが生徒ごとに送る自動通知を、この友だちのLINEに送ってよいかの許可です（現在はクロフネオンラインの遅刻検知が利用）。ONの相手だけに届きます。一斉配信とは別の仕組みで、一斉配信はこの設定に関係なく届きます。';
+  var sendChip = '<span class="help-chip" data-tip="'+sendTip+'">?</span>';
   var sendBtn = busy
     ? '<button class="btn gray small" disabled style="opacity:.6">処理中…</button>'
     : '<button class="btn gray small" onclick="event.stopPropagation();toggleSend(\''+uid+'\','+(!fr.sendOn)+')">'
-      + (fr.sendOn?'自動通知OFFにする':'自動通知ONにする') + '</button>';
+      + (fr.sendOn?'自動通知OFFにする':'自動通知ONにする') + '</button>' + sendChip;
   var lineFoot = '<div class="acc-foot"><span class="acc-b acc-b-line">LINE名: '+esc(fr.name||'')+'</span></div>';
 
   if (linked) {
@@ -653,6 +656,7 @@ function accDetailHtml_(fr){
     + accTagPills_(fr)
     + '<div class="acc-acts">'
       + '<button class="btn green small" onclick="event.stopPropagation();openLinkPicker_(\''+uid+'\')">この友だちを生徒に紐づける</button>'
+      + '<span class="help-chip" data-tip="この友だち（LINEアカウント）を、会員管理の生徒マスタにいる生徒と結びつけます。紐づけると、その生徒の学年・教室・在籍状況は会員管理が正となり、このツールでは編集できなくなります（会員管理の情報を表示するだけ）。一斉配信の状態・学年・教室での絞り込みも、紐づけ済みはこの会員情報を使います。">?</span>'
       + sendBtn
       + '</div>'
     + lineFoot
