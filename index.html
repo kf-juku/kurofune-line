@@ -280,7 +280,7 @@ header .sub { font-size: 12px; opacity: 0.85; }
     <!-- 絞り込みパネル（A-④：状態・学年・教室・コース。一斉配信とUIを揃える） -->
     <div class="acc-filters" id="accFilters">
       <div class="bc-group"><div class="bc-glabel">状態</div><div class="bc-checks" id="afStatus"><label><input type="checkbox" value="在籍" onchange="renderAccList()">在籍</label><label><input type="checkbox" value="休会" onchange="renderAccList()">休会</label><label><input type="checkbox" value="退会" onchange="renderAccList()">退会</label><label><input type="checkbox" value="見込み客" onchange="renderAccList()">見込み客</label></div></div>
-      <div class="bc-group"><div class="bc-glabel">コース<span class="help-chip" data-tip="塾/CAは紐づけ済みの会員だけが対象です。">?</span></div><div class="bc-checks" id="afCourse"><label><input type="radio" name="afCourse" value="" checked onchange="renderAccList()">指定なし</label><label><input type="radio" name="afCourse" value="juku" onchange="renderAccList()">クロフネ</label><label><input type="radio" name="afCourse" value="ca" onchange="renderAccList()">CA</label></div></div>
+      <div class="bc-group"><div class="bc-glabel">コース<span class="help-chip" data-tip="チェックなし＝全員。クロフネだけ／CAだけにチェックでその所属の人。両方チェックすると『クロフネとCAの両方に通う人』だけが対象になります（クロフネだけに連絡したいなら『クロフネ』だけチェック。※両方通いの子は外れます）。塾/CAは紐づけ済みの会員だけが対象です。">?</span></div><div class="bc-checks" id="afCourse"><label><input type="checkbox" value="juku" onchange="renderAccList()">クロフネ</label><label><input type="checkbox" value="ca" onchange="renderAccList()">CA</label></div></div>
       <div class="bc-group"><div class="bc-glabel">教室</div><div class="bc-checks" id="afRoom"><label><input type="checkbox" value="北久里浜教室" onchange="renderAccList()">北久里浜</label><label><input type="checkbox" value="京急久里浜駅前教室" onchange="renderAccList()">京急久里浜駅前</label></div></div>
       <div class="bc-group"><div class="bc-glabel">学年</div><div class="bc-checks" id="afGrade"><label><input type="checkbox" value="小学1年生" onchange="renderAccList()">小1</label><label><input type="checkbox" value="小学2年生" onchange="renderAccList()">小2</label><label><input type="checkbox" value="小学3年生" onchange="renderAccList()">小3</label><label><input type="checkbox" value="小学4年生" onchange="renderAccList()">小4</label><label><input type="checkbox" value="小学5年生" onchange="renderAccList()">小5</label><label><input type="checkbox" value="小学6年生" onchange="renderAccList()">小6</label><label><input type="checkbox" value="中学1年生" onchange="renderAccList()">中1</label><label><input type="checkbox" value="中学2年生" onchange="renderAccList()">中2</label><label><input type="checkbox" value="中学3年生" onchange="renderAccList()">中3</label><label><input type="checkbox" value="高校1年生" onchange="renderAccList()">高1</label><label><input type="checkbox" value="高校2年生" onchange="renderAccList()">高2</label><label><input type="checkbox" value="高校3年生" onchange="renderAccList()">高3</label></div></div>
       <div style="text-align:right;"><button class="btn gray small" onclick="clearAccFilters()">絞り込みをクリア</button></div>
@@ -298,7 +298,7 @@ header .sub { font-size: 12px; opacity: 0.85; }
         <div class="bc2-filters">
           <div class="bc-group"><div class="bc-glabel">種別</div><div class="bc-checks" id="bcKind"><label><input type="checkbox" value="保護者" onchange="renderBcFilter()">保護者</label><label><input type="checkbox" value="生徒" onchange="renderBcFilter()">生徒</label></div></div>
           <div class="bc-group"><div class="bc-glabel">状態<span class="help-chip" data-tip="紐づけ済み＝会員管理ステータスが正。未紐づけ＝見込み客。普段は在籍だけONでOK。">?</span></div><div class="bc-checks" id="bcStatus"><label><input type="checkbox" value="在籍" checked onchange="renderBcFilter()">在籍</label><label><input type="checkbox" value="休会" onchange="renderBcFilter()">休会</label><label><input type="checkbox" value="退会" onchange="renderBcFilter()">退会（過去生）</label><label><input type="checkbox" value="見込み客" onchange="renderBcFilter()">見込み客</label></div></div>
-          <div class="bc-group"><div class="bc-glabel">コース<span class="help-chip" data-tip="塾/CAは紐づけ済みの会員だけが対象です。">?</span></div><div class="bc-checks" id="bcCourse"><label><input type="radio" name="bcCourse" value="" checked onchange="renderBcFilter()">指定なし</label><label><input type="radio" name="bcCourse" value="juku" onchange="renderBcFilter()">クロフネ</label><label><input type="radio" name="bcCourse" value="ca" onchange="renderBcFilter()">CA</label></div></div>
+          <div class="bc-group"><div class="bc-glabel">コース<span class="help-chip" data-tip="チェックなし＝全員。クロフネだけ／CAだけにチェックでその所属の人。両方チェックすると『クロフネとCAの両方に通う人』だけが対象になります（クロフネだけに連絡したいなら『クロフネ』だけチェック。※両方通いの子は外れます）。塾/CAは紐づけ済みの会員だけが対象です。">?</span></div><div class="bc-checks" id="bcCourse"><label><input type="checkbox" value="juku" onchange="renderBcFilter()">クロフネ</label><label><input type="checkbox" value="ca" onchange="renderBcFilter()">CA</label></div></div>
           <div class="bc-group"><div class="bc-glabel">教室</div><div class="bc-checks" id="bcRoom"><label><input type="checkbox" value="北久里浜教室" onchange="renderBcFilter()">北久里浜</label><label><input type="checkbox" value="京急久里浜駅前教室" onchange="renderBcFilter()">京急久里浜駅前</label></div></div>
           <div class="bc-group"><div class="bc-glabel">学年</div><div class="bc-checks" id="bcGrade"><label><input type="checkbox" value="小学1年生" onchange="renderBcFilter()">小1</label><label><input type="checkbox" value="小学2年生" onchange="renderBcFilter()">小2</label><label><input type="checkbox" value="小学3年生" onchange="renderBcFilter()">小3</label><label><input type="checkbox" value="小学4年生" onchange="renderBcFilter()">小4</label><label><input type="checkbox" value="小学5年生" onchange="renderBcFilter()">小5</label><label><input type="checkbox" value="小学6年生" onchange="renderBcFilter()">小6</label><label><input type="checkbox" value="中学1年生" onchange="renderBcFilter()">中1</label><label><input type="checkbox" value="中学2年生" onchange="renderBcFilter()">中2</label><label><input type="checkbox" value="中学3年生" onchange="renderBcFilter()">中3</label><label><input type="checkbox" value="高校1年生" onchange="renderBcFilter()">高1</label><label><input type="checkbox" value="高校2年生" onchange="renderBcFilter()">高2</label><label><input type="checkbox" value="高校3年生" onchange="renderBcFilter()">高3</label></div></div>
           <div class="bc-group"><div class="bc-glabel">受講オプション<span class="help-chip" data-tip="紐づけ済みの会員だけが対象です。">?</span></div><div class="bc-checks" id="bcOption"><label><input type="checkbox" value="eiken" onchange="renderBcFilter()">英検対策</label><label><input type="checkbox" value="juken" onchange="renderBcFilter()">受験特訓</label></div></div>
@@ -583,17 +583,17 @@ function applyAccFilters_(rows){
   var statuses = checkedVals('afStatus');
   var grades   = checkedVals('afGrade');
   var roomsArr = checkedVals('afRoom');
-  var course   = (document.querySelector('#afCourse input:checked')||{}).value||'';
-  if (!statuses.length && !grades.length && !roomsArr.length && !course) return rows; // 何も指定なし
+  var courses  = checkedVals('afCourse'); // ['juku','ca'] のチェック配列。両方＝AND。なし＝全員。
+  if (!statuses.length && !grades.length && !roomsArr.length && !courses.length) return rows; // 何も指定なし
   return rows.filter(function(fr){
     var e = bcEffective_(fr);
     if (statuses.length && statuses.indexOf(e.status)<0) return false;
     if (grades.length   && grades.indexOf(e.grade)<0) return false;
     if (roomsArr.length && roomsArr.indexOf(e.room)<0) return false;
-    if (course){
+    if (courses.length){
       if (!fr.studentId) return false; // コースは紐づけ済みのみ
-      if (course==='juku' && !e.attrJuku) return false;
-      if (course==='ca'   && !e.attrCa)   return false;
+      if (courses.indexOf('juku')>=0 && !e.attrJuku) return false; // AND
+      if (courses.indexOf('ca')>=0   && !e.attrCa)   return false;
     }
     return true;
   });
@@ -601,10 +601,9 @@ function applyAccFilters_(rows){
 
 // 絞り込みをクリア
 function clearAccFilters(){
-  ['afStatus','afGrade','afRoom'].forEach(function(id){
+  ['afStatus','afGrade','afRoom','afCourse'].forEach(function(id){
     document.querySelectorAll('#'+id+' input[type=checkbox]').forEach(function(c){ c.checked=false; });
   });
-  var none=document.querySelector('#afCourse input[value=""]'); if(none) none.checked=true;
   renderAccList();
 }
 
@@ -1057,15 +1056,15 @@ function checkedVals(id){ return Array.prototype.slice.call(document.querySelect
 function bcEnsureState_(){ if(!STATE.bcSel) STATE.bcSel = {}; }
 
 // フィルタUI → 絞り込み条件
+// courses：['juku','ca'] のチェック配列。両方チェック＝AND（両方所属）。なし＝全員。
 function bcFilterCond(){
-  var course=(document.querySelector('#bcCourse input:checked')||{}).value||'';
   return {
     kinds:    checkedVals('bcKind'),
     statuses: checkedVals('bcStatus'),
     rooms:    checkedVals('bcRoom'),
     grades:   checkedVals('bcGrade'),
     options:  checkedVals('bcOption'),
-    course:   course
+    courses:  checkedVals('bcCourse')
   };
 }
 
@@ -1088,10 +1087,11 @@ function bcFilteredFriends(){
     if (c.statuses.length && c.statuses.indexOf(e.status)<0) return false;
     if (c.grades.length   && c.grades.indexOf(e.grade)<0) return false;
     if (c.rooms.length    && c.rooms.indexOf(e.room)<0) return false;
-    if ((c.course && c.course!=='') || c.options.length){
+    // コース：チェックした所属を全て満たす（AND）。両方チェック＝両方所属のみ。なし＝絞らない。
+    if ((c.courses && c.courses.length) || c.options.length){
       if (!fr.studentId) return false; // コース/オプションは紐づけ済みのみ
-      if (c.course==='juku' && !e.attrJuku) return false;
-      if (c.course==='ca'   && !e.attrCa)   return false;
+      if (c.courses && c.courses.indexOf('juku')>=0 && !e.attrJuku) return false;
+      if (c.courses && c.courses.indexOf('ca')>=0   && !e.attrCa)   return false;
       if (c.options.length){ var hit=c.options.some(function(o){return e.options.indexOf(o)>=0;}); if(!hit) return false; }
     }
     return true;
