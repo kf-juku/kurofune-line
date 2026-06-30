@@ -164,6 +164,41 @@ header .sub { font-size: 12px; opacity: 0.85; }
 .acc-b-self { background:#FAEEDA; color:#854F0B; }
 .acc-b-line { background:#D3D1C7; color:#2C2C2A; }
 .acc-b-status { background:#F1EFE8; color:#5F5E5A; }
+/* A案(2026-06-30) 行属性表示：左バー＋種別＋薄テキスト属性 */
+.acc-row.bar-k-s { border-left:3px solid #378ADD; }
+.acc-row.bar-k-p { border-left:3px solid #7F77DD; }
+.acc-kind { font-size:11px; font-weight:700; }
+.acc-kind.k-s { color:#185FA5; }
+.acc-kind.k-p { color:#534AB7; }
+.acc-attrs { font-size:12px; color:var(--text-muted); display:inline-flex; align-items:center; flex-wrap:wrap; gap:2px; }
+.acc-attr { white-space:nowrap; }
+.acc-attr.in { color:#0F6E56; font-weight:600; }
+.acc-attr.lead { color:#854F0B; font-weight:600; }
+.acc-sep { color:#C5CBD3; margin:0 1px; }
+/* LINE未登録サブタブ＋リスト(2026-06-30) */
+.acc-subtab.noline { color:#A32D2D; }
+.acc-subtab.noline.active { background:#A32D2D; color:white; border-color:#A32D2D; }
+.nl-head { padding:9px 12px; font-size:12px; font-weight:700; color:var(--text-muted); background:#F1EFE8; border-bottom:1px solid #eef0f3; }
+.nl-row { display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid #eef0f3; }
+.nl-row:last-child { border-bottom:none; }
+.nl-name { font-size:13px; font-weight:600; min-width:120px; }
+.nl-meta { font-size:11px; color:var(--text-muted); flex:1; }
+.nl-mail { font-size:12px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; background:#edf0f5; color:#1a2535; padding:3px 8px; border-radius:6px; max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.nl-nomail { font-size:11px; color:#A32D2D; background:#FCEBEB; padding:3px 8px; border-radius:6px; white-space:nowrap; }
+.nl-copy { font-size:11px; padding:4px 10px; border:1px solid var(--crimson); background:white; color:var(--crimson-dark); border-radius:6px; cursor:pointer; font-weight:600; white-space:nowrap; }
+.nl-copy:hover:not([disabled]) { background:var(--crimson-light); }
+.nl-copy[disabled] { opacity:.4; cursor:default; border-color:#ccc; color:#999; }
+/* 一斉配信 LINE未登録（配信対象外）パネル(2026-06-30) */
+.bc-noline { margin-top:10px; border:1px solid #F09595; border-radius:8px; overflow:hidden; }
+.bc-noline-head { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px 12px; background:#FCEBEB; flex-wrap:wrap; }
+.bc-noline-head #bcNoLineTitle { font-size:12px; font-weight:700; color:#A32D2D; }
+.bc-noline-copyall { font-size:11px; padding:6px 12px; border:none; background:var(--crimson); color:white; border-radius:6px; cursor:pointer; font-weight:600; white-space:nowrap; }
+.bc-noline-copyall:hover:not([disabled]) { background:var(--crimson-dark); }
+.bc-noline-copyall[disabled] { opacity:.5; cursor:default; }
+.bc-noline-guide { font-size:11px; color:#664d03; background:#fffbe6; padding:8px 12px; line-height:1.7; border-top:1px solid #F09595; border-bottom:1px solid #f3e3a0; }
+.bc-noline-guide b { color:#7a5b00; }
+.bc-mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; background:#fff; padding:1px 5px; border-radius:4px; border:1px solid #e6d68a; }
+.bc-noline-list { max-height:200px; overflow-y:auto; }
 .acc-rwrap { margin-left:auto; display:flex; align-items:center; gap:8px; }
 .acc-rt { font-size:11px; color:var(--text-light); white-space:nowrap; }
 .acc-rt.unlinked { color:#854F0B; }
@@ -290,6 +325,7 @@ header .sub { font-size: 12px; opacity: 0.85; }
       <div class="acc-subtab active" data-acctab="unlinked" onclick="setAccTab('unlinked')">未紐づけ <span id="accCntUnlinked">0</span></div>
       <div class="acc-subtab" data-acctab="linked" onclick="setAccTab('linked')">紐づけ済み <span id="accCntLinked">0</span></div>
       <div class="acc-subtab" data-acctab="past" onclick="setAccTab('past')">過去生 <span id="accCntPast">0</span></div>
+      <div class="acc-subtab noline" data-acctab="noline" onclick="setAccTab('noline')">📵 LINE未登録 <span id="accCntNoline">0</span></div>
     </div>
     <!-- ツールバー：検索・並び替え・絞り込みトグル -->
     <div class="acc-toolbar">
@@ -341,6 +377,20 @@ header .sub { font-size: 12px; opacity: 0.85; }
           <button class="btn gray small" onclick="bcAddAllShown()">☑ 表示中を全て選択に追加</button>
         </div>
         <div class="bc2-resultlist" id="bcResultList"><div class="empty" style="padding:14px;">条件を選ぶと候補が出ます</div></div>
+        <!-- LINE未登録（この絞り込みに該当するがLINE未登録＝配信対象外。メールで送る人）(2026-06-30) -->
+        <div class="bc-noline" id="bcNoLinePanel" style="display:none;">
+          <div class="bc-noline-head">
+            <span id="bcNoLineTitle">📵 LINE未登録（配信対象外）0名</span>
+            <button class="bc-noline-copyall" id="bcNoLineCopyAll" onclick="bcCopyAllMails()">📋 BCC用にメールを全部コピー</button>
+          </div>
+          <div class="bc-noline-guide">
+            この人たちはLINEに登録が無いためメールで送ります。
+            <b>To</b>＝<span class="bc-mono">kurofune.school@gmail.com</span>（塾アドレス）／
+            <b>BCC</b>＝下のコピーしたアドレス／
+            <b>宛名</b>＝「保護者各位」など全員共通（個別の○○様は入りません）
+          </div>
+          <div class="bc-noline-list" id="bcNoLineList"></div>
+        </div>
       </div>
       <!-- 右1/3：選択中 -->
       <div class="cast2-right">
@@ -484,6 +534,55 @@ function memberById_(id){
   return hit.length ? hit[0] : null;
 }
 
+// 川上さん指示(2026-06-30)：会員管理にいるがLINEに紐づいていない（=LINEアカウントが無い）会員を逆算する。
+// 友だちシートに studentId として現れる会員idの集合を作り、会員全件からそれを引く。退会者は除く（在籍・休会のみ）。
+function noLineMembers_(){
+  var linkedIds = {};
+  (STATE.friends||[]).forEach(function(fr){ if(fr.studentId) linkedIds[String(fr.studentId)]=true; });
+  return (STATE.members||[]).filter(function(m){
+    if(!m.id) return false;
+    if(linkedIds[String(m.id)]) return false;          // LINE紐づけ済み→除外
+    if(String(m.status||'')==='退会') return false;     // 退会者は連絡対象外→除外
+    return true;
+  });
+}
+
+// 会員1人の属性を「種別なし・会員管理が正」で表示用にまとめる（LINE未登録リスト用）
+function memberLineAttrs_(m){
+  var parts=[];
+  parts.push('生徒'); // 会員管理は生徒レコード
+  parts.push(String(m.status||''));
+  if(m.attrJuku) parts.push('クロフネ');
+  if(m.attrCa)   parts.push('CA');
+  if(m.classroom) parts.push(shortRoom_(m.classroom));
+  if(m.grade)    parts.push(normGrade_(m.grade));
+  return parts.filter(function(x){return x;}).join('・');
+}
+
+// LINE未登録会員リストのHTMLを返す
+function noLineListHtml_(list){
+  if(!list.length) return '<div class="empty">LINE未登録の会員はいません</div>';
+  return list.map(function(m){
+    var mail=String(m.email||'').trim();
+    var mailHtml = mail
+      ? '<span class="nl-mail" title="'+esc(mail)+'">'+esc(mail)+'</span>'
+        +'<button class="nl-copy" onclick="copyText_(\''+esc(mail).replace(/'/g,"\\'")+'\',this)">📋 コピー</button>'
+      : '<span class="nl-nomail">メール未登録</span><button class="nl-copy" disabled>不可</button>';
+    return '<div class="nl-row">'
+      + '<span class="nl-name">'+esc(m.name||'(名前なし)')+'</span>'
+      + '<span class="nl-meta">'+esc(memberLineAttrs_(m))+'</span>'
+      + mailHtml + '</div>';
+  }).join('');
+}
+
+// テキスト1件コピー（メール・本文共通）
+function copyText_(text, btn){
+  var done=function(){ if(btn){ var t=btn.textContent; btn.textContent='✓ コピー済'; setTimeout(function(){ btn.textContent=t; },1500);} };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(function(){ fallbackCopy_(text); done(); });
+  } else { fallbackCopy_(text); done(); }
+}
+
 /* ===== アカウント管理 コンパクト一覧（2026-06-29 モック準拠で作り直し）=====
    旧 renderFriends/renderMembers（2カラム＋生徒マスタ）を廃止し、1行=1人の一覧に統合。
    タブ：未紐づけ（見込み客）／紐づけ済み（在籍・休会）／過去生（退会）。
@@ -538,18 +637,25 @@ function gradeRank_(grade){
 // 友だちの「表示用の名前・学年・教室・状態」を出どころ込みで返す
 // 紐づけ済み＝会員管理が正、未紐づけ＝本人入力／LINE名。
 function accDisplay_(fr){
+  // 川上さん指示(2026-06-30)：行に 種別/入会/塾CA/教室/学年 を出す（A案）。
+  // kind(生徒/保護者)はLINEタグ。入会・塾CAは紐づけ済み＝会員管理が正、未紐づけ＝見込み客。
+  // 母/父の区別は会員管理にデータが無いため出さない（種別は生徒/保護者の2値のみ）。
+  var kind = String(fr.kind||''); // '生徒' or '保護者' or ''
   var linked = !!fr.studentId;
   var mem = linked ? memberById_(fr.studentId) : null;
   if (linked && mem){
     return { name: mem.name||'(会員名なし)', grade: mem.grade||'', room: mem.classroom||'',
-             status: mem.status||'', src:'mem', lineName: fr.name||'' };
+             status: mem.status||'', src:'mem', lineName: fr.name||'', kind:kind,
+             enroll:'入会済', attrJuku:!!mem.attrJuku, attrCa:!!mem.attrCa, email:String(mem.email||'') };
   }
   if (linked){ // 紐づけ済みだが会員が見つからない
-    return { name: fr.name||'(表示名なし)', grade:'', room:'', status:'会員情報なし', src:'line', lineName: fr.name||'' };
+    return { name: fr.name||'(表示名なし)', grade:'', room:'', status:'会員情報なし', src:'line', lineName: fr.name||'',
+             kind:kind, enroll:'', attrJuku:false, attrCa:false, email:'' };
   }
   // 未紐づけ＝見込み客（本人入力タグ）
   return { name: fr.name||'(表示名なし)', grade: fr.grade||'', room: fr.room||'',
-           status:'見込み客', src:'self', lineName: fr.name||'' };
+           status:'見込み客', src:'self', lineName: fr.name||'', kind:kind,
+           enroll:'見込み客', attrJuku:false, attrCa:false, email:'' };
 }
 
 function renderAccList(){
@@ -566,6 +672,19 @@ function renderAccList(){
   $('accCntUnlinked').textContent = cntUnlinked;
   $('accCntLinked').textContent   = cntLinked;
   $('accCntPast').textContent     = cntPast;
+  var noLine = noLineMembers_();
+  if($('accCntNoline')) $('accCntNoline').textContent = noLine.length;
+
+  // LINE未登録タブ：会員管理にいてLINE紐づけが無い会員を表示（友だちベースではない）
+  if (STATE.accTab==='noline'){
+    STATE.accBulkRows=[]; if($('accBulkStat')) $('accBulkStat').textContent='';
+    var nl = noLineMembers_();
+    var qn = ($('accSearch').value||'').trim();
+    if(qn) nl = nl.filter(function(m){ return String(m.name||'').indexOf(qn)>=0 || String(m.reading||'').indexOf(qn)>=0; });
+    nl = nl.slice().sort(function(a,b){ return gradeRank_(a.grade)-gradeRank_(b.grade); });
+    el.innerHTML = '<div class="nl-head">会員管理にいるが LINE未登録（未紐づけ）の会員：'+nl.length+'名　※退会者は除く</div>' + noLineListHtml_(nl);
+    return;
+  }
 
   if (!all.length){ el.innerHTML = '<div class="empty">友だちがいません</div>'; return; }
 
@@ -602,10 +721,17 @@ function renderAccList(){
     var d = accDisplay_(fr);
     var open = STATE.accOpenId === fr.userId;
     var bCls = d.src==='mem' ? 'acc-b-mem' : (d.src==='self' ? 'acc-b-self' : 'acc-b-line');
-    var badges = '';
-    if (d.grade) badges += '<span class="acc-b '+bCls+'">'+esc(normGrade_(d.grade))+'</span>';
-    if (d.room)  badges += '<span class="acc-b '+bCls+'">'+esc(shortRoom_(d.room))+'</span>';
-    if (d.status && d.status!=='見込み客') badges += '<span class="acc-b acc-b-status">'+esc(d.status)+'</span>';
+    // A案(2026-06-30)：種別→入会→塾CA→教室→学年 の順で薄テキスト表示。左バーは生徒=青/保護者=紫。
+    var kindCls = d.kind==='生徒' ? 'k-s' : (d.kind==='保護者' ? 'k-p' : '');
+    var kindLabel = d.kind ? '('+esc(d.kind)+')' : '';
+    var attrs = [];
+    if (d.enroll==='入会済')      attrs.push('<span class="acc-attr in">入会済</span>');
+    else if (d.enroll==='見込み客') attrs.push('<span class="acc-attr lead">見込み客</span>');
+    if (d.attrJuku) attrs.push('<span class="acc-attr">クロフネ</span>');
+    if (d.attrCa)   attrs.push('<span class="acc-attr">CA</span>');
+    if (d.room)  attrs.push('<span class="acc-attr">'+esc(shortRoom_(d.room))+'</span>');
+    if (d.grade) attrs.push('<span class="acc-attr">'+esc(normGrade_(d.grade))+'</span>');
+    var badges = '<span class="acc-attrs">'+attrs.join('<span class="acc-sep">・</span>')+'</span>';
     // 未紐づけ行：紐づけ候補表示＋行内「紐づけ」ボタン（開かなくても紐づけできる）
     var rightExtra = '';
     if (!fr.studentId){
@@ -629,8 +755,8 @@ function renderAccList(){
     var rt = !fr.studentId
       ? rightExtra + tg + '<span class="acc-rt unlinked">未紐づけ '+(open?'▴':'▾')+'</span>'
       : tg + '<span class="acc-rt">紐づけ済 '+(open?'▴':'▾')+'</span>';
-    var rowHtml = '<div class="acc-row'+(open?' open':'')+'" onclick="toggleAccRow(\''+esc(fr.userId)+'\')">'
-      + '<span class="acc-name">'+esc(d.name)+'</span>'
+    var rowHtml = '<div class="acc-row bar-'+kindCls+(open?' open':'')+'" onclick="toggleAccRow(\''+esc(fr.userId)+'\')">'
+      + '<span class="acc-name">'+(kindLabel?'<span class="acc-kind '+kindCls+'">'+kindLabel+'</span> ':'')+esc(d.name)+'</span>'
       + badges + '<span class="acc-rwrap">' + rt + '</span></div>';
     var detail = open ? accDetailHtml_(fr) : '';
     return rowHtml + detail;
@@ -1252,6 +1378,59 @@ function renderBcFilter(){
     return '<label class="bc2-rrow"><input type="checkbox"'+checked+' onchange="bcToggleSelect(\''+uid+'\',this.checked)"> '
       + '<span>'+esc(bcName_(fr))+'</span><span class="bc2-rmeta">'+esc(meta)+'</span></label>';
   }).join('');
+  renderBcNoLine_();
+}
+
+// 川上さん指示(2026-06-30)：一斉配信の絞り込み条件に該当するが、LINE未登録（配信対象外）の会員を出す。
+// 範囲＝絞り込んだタグ内だけ（川上さん 2026-06-30）。会員管理の状態/学年/教室/コースで絞る。
+// 種別(生徒/保護者)は会員管理に無い（会員は生徒レコード）ため、種別チェックは無視する。退会者は除く。
+function bcNoLineMembers_(){
+  var c = bcFilterCond();
+  return noLineMembers_().filter(function(m){
+    if(c.statuses.length && c.statuses.indexOf(String(m.status||''))<0) return false;
+    if(c.grades.length   && c.grades.indexOf(String(m.grade||''))<0) return false;
+    if(c.rooms.length    && c.rooms.indexOf(String(m.classroom||''))<0) return false;
+    if(c.courses && c.courses.length){
+      if(c.courses.indexOf('juku')>=0 && !m.attrJuku) return false;
+      if(c.courses.indexOf('ca')>=0   && !m.attrCa)   return false;
+    }
+    if(c.options && c.options.length){
+      var opts=m.options||[]; var hit=c.options.some(function(o){return opts.indexOf(o)>=0;}); if(!hit) return false;
+    }
+    return true;
+  });
+}
+
+// LINE未登録（配信対象外）パネルを描画
+function renderBcNoLine_(){
+  var panel=$('bcNoLinePanel'); if(!panel) return;
+  var c=bcFilterCond();
+  // 何も絞っていない（全条件空）ときは出さない（全会員の未登録が出て紛らわしいため）。
+  var anyCond = c.statuses.length||c.grades.length||c.rooms.length||(c.courses&&c.courses.length)||c.options.length;
+  if(!anyCond){ panel.style.display='none'; return; }
+  var list=bcNoLineMembers_();
+  if(!list.length){ panel.style.display='none'; return; }
+  panel.style.display='block';
+  $('bcNoLineTitle').textContent='📵 LINE未登録（配信対象外）'+list.length+'名';
+  var withMail=list.filter(function(m){return String(m.email||'').trim();}).length;
+  var copyBtn=$('bcNoLineCopyAll');
+  if(copyBtn){ copyBtn.disabled = withMail===0; copyBtn.textContent = withMail? ('📋 BCC用にメールを全部コピー（'+withMail+'件）') : 'メール登録者なし'; }
+  $('bcNoLineList').innerHTML = list.sort(function(a,b){return gradeRank_(a.grade)-gradeRank_(b.grade);}).map(function(m){
+    var mail=String(m.email||'').trim();
+    var mailHtml = mail
+      ? '<span class="nl-mail" title="'+esc(mail)+'">'+esc(mail)+'</span><button class="nl-copy" onclick="copyText_(\''+esc(mail).replace(/'/g,"\\'")+'\',this)">📋</button>'
+      : '<span class="nl-nomail">メール未登録</span>';
+    return '<div class="nl-row"><span class="nl-name">'+esc(m.name||'')+'</span>'
+      + '<span class="nl-meta">'+esc(memberLineAttrs_(m))+'</span>'+mailHtml+'</div>';
+  }).join('');
+}
+
+// BCC用：メール登録のある未登録会員のアドレスをカンマ区切りで一括コピー
+function bcCopyAllMails(){
+  var mails=bcNoLineMembers_().map(function(m){return String(m.email||'').trim();}).filter(Boolean);
+  if(!mails.length){ alert('メールが登録されている人がいません'); return; }
+  copyText_(mails.join(', '), null);
+  var btn=$('bcNoLineCopyAll'); if(btn){ var t=btn.textContent; btn.textContent='✓ '+mails.length+'件コピーしました'; setTimeout(function(){ btn.textContent=t; },2000); }
 }
 
 // 選択中リストを描画＋件数＋送信ボタン文言更新
