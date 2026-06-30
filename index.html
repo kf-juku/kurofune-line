@@ -482,14 +482,16 @@ function getApiKey(){ return ($('apiKey').value||'').trim(); }
 
 function saveSettingsAndLoad(){
   if (!getGasUrl() || !getApiKey()) { alert('GAS URL と API Key を入れてください'); return; }
-  sessionStorage.setItem('kfline_gasUrl', getGasUrl());
-  sessionStorage.setItem('kfline_apiKey', getApiKey());
+  localStorage.setItem('kfline_gasUrl', getGasUrl());
+  localStorage.setItem('kfline_apiKey', getApiKey());
   $('settingsPanel').style.display='none';
   loadAll();
 }
 function restoreSettings(){
-  var u = sessionStorage.getItem('kfline_gasUrl'); if (u) $('gasUrl').value = u;
-  var k = sessionStorage.getItem('kfline_apiKey'); if (k) $('apiKey').value = k;
+  // 川上さん判断(2026-07-01)：社内ツールのため接続設定をlocalStorageに保存し、開くたびのリセットを解消。
+  // 旧 sessionStorage 保存分があれば引き継ぐ（移行のため一度だけ読む）。
+  var u = localStorage.getItem('kfline_gasUrl') || sessionStorage.getItem('kfline_gasUrl'); if (u) $('gasUrl').value = u;
+  var k = localStorage.getItem('kfline_apiKey') || sessionStorage.getItem('kfline_apiKey'); if (k) $('apiKey').value = k;
 }
 
 // 処理中表示＋連打防止：ボタンを押したら無効化＋「処理中…」にし、完了/失敗で必ず元に戻す。
