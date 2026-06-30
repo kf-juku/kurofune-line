@@ -263,6 +263,11 @@ header .sub { font-size: 12px; opacity: 0.85; }
 .bc2-rrow:hover { background:#fafbfc; }
 .bc2-rrow input { margin:0; }
 .bc2-rmeta { margin-left:auto; font-size:11px; color:var(--text-light); }
+/* 一斉配信の行をアカウント管理(A案)に統一(2026-06-30) */
+.bc2-rrow.bar-k-s, .bc2-chip.bar-k-s { border-left:3px solid #378ADD; }
+.bc2-rrow.bar-k-p, .bc2-chip.bar-k-p { border-left:3px solid #7F77DD; }
+.bc2-rname { font-weight:600; }
+.bc2-rrow .acc-attrs, .bc2-chip .acc-attrs { margin-left:auto; }
 /* 右：選択中 */
 .cast2-right { background:#E1F5EE; border-color:#5DCAA5; }
 .bc2-sel-h { font-size:13px; font-weight:700; color:#0F6E56; }
@@ -453,7 +458,7 @@ header .sub { font-size: 12px; opacity: 0.85; }
 
 </div>
 <script>
-var STATE = { friends: [], members: [], selectedUserId: null, accTab: 'unlinked', accOpenId: null, accEditUser: null, accEditField: null };
+var STATE = { friends: [], members: [], loaded:false, selectedUserId: null, accTab: 'unlinked', accOpenId: null, accEditUser: null, accEditField: null };
 
 function $(id){ return document.getElementById(id); }
 function setStatus(msg){ $('statusMsg').textContent = msg || ''; }
@@ -506,6 +511,7 @@ function callGas(action, extra){
 function loadAll(){
   if (!getGasUrl() || !getApiKey()) { alert('接続設定を入れてください'); return; }
   setStatus('読み込み中…');
+  STATE.loaded = false; renderAccList(); // 取得前は「読み込み中…」を出す（0と誤認させない）
   Promise.all([ callGas('getFriends',{}), callGas('getMembers',{}) ])
     .then(function(res){
       var f = res[0], m = res[1];
@@ -513,6 +519,7 @@ function loadAll(){
       if (!m.ok) throw new Error('生徒取得失敗: ' + (m.error||''));
       STATE.friends = f.friends || [];
       STATE.members = m.members || [];
+      STATE.loaded = true;
       STATE.accOpenId = null;
       renderAccList();
       var n = STATE.friends.filter(function(x){ return !x.studentId; }).length;
@@ -661,6 +668,13 @@ function accDisplay_(fr){
 function renderAccList(){
   var el = $('accList');
   if (!el) return;
+  // 読み込み未完了：件数は「…」、リストは「読み込み中…」を出して0と誤認させない(2026-06-30)
+  if (!STATE.loaded){
+    ['accCntUnlinked','accCntLinked','accCntPast','accCntNoline'].forEach(function(id){ if($(id)) $(id).textContent='…'; });
+    el.innerHTML = '<div class="empty" style="padding:18px;">会員データを読み込み中…</div>';
+    if($('accBulkStat')) $('accBulkStat').textContent='';
+    return;
+  }
   // タブごとの件数を更新
   var all = STATE.friends || [];
   var cntUnlinked=0, cntLinked=0, cntPast=0;
@@ -1363,20 +1377,37 @@ function bcName_(fr){
   return d.name || fr.name || '(名前なし)';
 }
 
+// 一斉配信の行をアカウント管理(A案)と同じ見た目に揃える(2026-06-30)。
+// 左バー用クラス・種別ラベル・属性テキスト(入会/塾CA/教室/学年)を返す。
+function bcRowParts_(fr){
+  var d = accDisplay_(fr);
+  var kindCls = d.kind==='生徒' ? 'k-s' : (d.kind==='保護者' ? 'k-p' : '');
+  var kindLabel = d.kind ? '<span class="acc-kind '+kindCls+'">('+esc(d.kind)+')</span> ' : '';
+  var a=[];
+  if(d.enroll==='入会済')      a.push('<span class="acc-attr in">入会済</span>');
+  else if(d.enroll==='見込み客') a.push('<span class="acc-attr lead">見込み客</span>');
+  if(d.attrJuku) a.push('<span class="acc-attr">クロフネ</span>');
+  if(d.attrCa)   a.push('<span class="acc-attr">CA</span>');
+  if(d.room)  a.push('<span class="acc-attr">'+esc(shortRoom_(d.room))+'</span>');
+  if(d.grade) a.push('<span class="acc-attr">'+esc(normGrade_(d.grade))+'</span>');
+  return { barCls:'bar-'+kindCls, kindLabel:kindLabel, name:esc(d.name||fr.name||'(名前なし)'),
+           attrs:'<span class="acc-attrs">'+a.join('<span class="acc-sep">・</span>')+'</span>' };
+}
+
 // 絞り込み結果リストを描画
 function renderBcFilter(){
   bcEnsureState_();
   var el = $('bcResultList'); if(!el) return;
+  if (!STATE.loaded){ el.innerHTML='<div class="empty" style="padding:14px;">会員データを読み込み中…</div>'; if($('bcResultCount'))$('bcResultCount').textContent='絞り込み結果 …'; var p=$('bcNoLinePanel'); if(p)p.style.display='none'; return; }
   var list = bcFilteredFriends();
   $('bcResultCount').textContent = '絞り込み結果 '+list.length+'名';
   if(!list.length){ el.innerHTML = '<div class="empty" style="padding:14px;">条件に合う友だちがいません</div>'; return; }
   el.innerHTML = list.map(function(fr){
     var uid = esc(fr.userId);
     var checked = STATE.bcSel[fr.userId] ? ' checked' : '';
-    var e = bcEffective_(fr);
-    var meta = [normGrade_(e.grade), shortRoom_(e.room), (e.status&&e.status!=='見込み客'?e.status:'見込み客')].filter(Boolean).join(' ');
-    return '<label class="bc2-rrow"><input type="checkbox"'+checked+' onchange="bcToggleSelect(\''+uid+'\',this.checked)"> '
-      + '<span>'+esc(bcName_(fr))+'</span><span class="bc2-rmeta">'+esc(meta)+'</span></label>';
+    var p = bcRowParts_(fr);
+    return '<label class="bc2-rrow '+p.barCls+'"><input type="checkbox"'+checked+' onchange="bcToggleSelect(\''+uid+'\',this.checked)"> '
+      + '<span class="bc2-rname">'+p.kindLabel+p.name+'</span>'+p.attrs+'</label>';
   }).join('');
   renderBcNoLine_();
 }
@@ -1444,11 +1475,10 @@ function renderBcSelected(){
   el.innerHTML = ids.map(function(uid){
     var fr = (STATE.friends||[]).filter(function(f){return f.userId===uid;})[0];
     var manual = STATE.bcSel[uid] && STATE.bcSel[uid].manual;
-    var name = fr ? bcName_(fr) : '(不明)';
-    var e = fr ? bcEffective_(fr) : {grade:'',status:''};
-    var meta = [normGrade_(e.grade), (manual?'手動追加':(e.status&&e.status!=='見込み客'?e.status:''))].filter(Boolean).join(' ');
-    return '<div class="bc2-chip'+(manual?' manual':'')+'"><input type="checkbox" checked onchange="bcRemoveSelect(\''+esc(uid)+'\')"> '
-      + '<span>'+esc(name)+'</span><span class="bc2-chip-meta">'+esc(meta)+'</span></div>';
+    if(!fr){ return '<div class="bc2-chip"><input type="checkbox" checked onchange="bcRemoveSelect(\''+esc(uid)+'\')"> <span>(不明)</span></div>'; }
+    var p = bcRowParts_(fr);
+    return '<div class="bc2-chip '+p.barCls+(manual?' manual':'')+'"><input type="checkbox" checked onchange="bcRemoveSelect(\''+esc(uid)+'\')"> '
+      + '<span class="bc2-rname">'+p.kindLabel+p.name+(manual?' <span class="acc-attr lead">手動</span>':'')+'</span>'+p.attrs+'</div>';
   }).join('');
 }
 
