@@ -268,6 +268,17 @@ header .sub { font-size: 12px; opacity: 0.85; }
 .bc2-rrow.bar-k-p, .bc2-chip.bar-k-p { border-left:3px solid #7F77DD; }
 .bc2-rname { font-weight:600; }
 .bc2-rrow .acc-attrs, .bc2-chip .acc-attrs { margin-left:auto; }
+/* 絞り込みAND/OR目印 C案(2026-06-30) */
+.filter-note { font-size:11px; color:var(--text-muted); background:#EAF3FB; border-radius:6px; padding:5px 10px; margin-bottom:8px; }
+.filter-note i { font-style:normal; color:#185FA5; margin-right:3px; }
+.filter-note b { color:#185FA5; font-weight:700; }
+.filter-tag-and { font-size:10px; color:#854F0B; background:#FAEEDA; padding:1px 7px; border-radius:999px; margin-left:6px; vertical-align:middle; }
+/* D案：選択条件の式表示(2026-06-30) */
+.filter-expr { display:flex; align-items:center; gap:5px; flex-wrap:wrap; background:#EDF0F5; border-radius:8px; padding:7px 11px; margin-bottom:8px; }
+.fx-label { font-size:12px; color:var(--text-muted); font-weight:600; }
+.fx-chip { font-size:12px; padding:3px 10px; background:#E6F1FB; color:#185FA5; border-radius:999px; font-weight:600; }
+.fx-or { font-size:11px; color:var(--text-light); }
+.fx-and { font-size:11px; color:var(--text-muted); font-weight:700; margin:0 2px; }
 /* 右：選択中 */
 .cast2-right { background:#E1F5EE; border-color:#5DCAA5; }
 .bc2-sel-h { font-size:13px; font-weight:700; color:#0F6E56; }
@@ -344,8 +355,10 @@ header .sub { font-size: 12px; opacity: 0.85; }
     </div>
     <!-- 絞り込みパネル（A-④：状態・学年・教室・コース。一斉配信とUIを揃える） -->
     <div class="acc-filters" id="accFilters">
+      <div class="filter-note"><i>ℹ</i> ちがう項目どうしは<b>すべて満たす人</b>／同じ項目の中は<b>どれか</b></div>
       <div class="bc-group"><div class="bc-glabel">状態</div><div class="bc-checks" id="afStatus"><label><input type="checkbox" value="在籍" onchange="renderAccList()">在籍</label><label><input type="checkbox" value="休会" onchange="renderAccList()">休会</label><label><input type="checkbox" value="退会" onchange="renderAccList()">退会</label><label><input type="checkbox" value="見込み客" onchange="renderAccList()">見込み客</label></div></div>
-      <div class="bc-group"><div class="bc-glabel">コース<span class="help-chip" data-tip="チェックなし＝全員。クロフネだけ／CAだけにチェックでその所属の人。両方チェックすると『クロフネとCAの両方に通う人』だけが対象になります（クロフネだけに連絡したいなら『クロフネ』だけチェック。※両方通いの子は外れます）。塾/CAは紐づけ済みの会員だけが対象です。">?</span></div><div class="bc-checks" id="afCourse"><label><input type="checkbox" value="juku" onchange="renderAccList()">クロフネ</label><label><input type="checkbox" value="ca" onchange="renderAccList()">CA</label></div></div>
+      <div class="bc-group"><div class="bc-glabel">コース<span class="filter-tag-and">両方=両方通い</span><span class="help-chip" data-tip="チェックなし＝全員。クロフネだけ／CAだけにチェックでその所属の人。両方チェックすると『クロフネとCAの両方に通う人』だけが対象になります（クロフネだけに連絡したいなら『クロフネ』だけチェック。※両方通いの子は外れます）。塾/CAは紐づけ済みの会員だけが対象です。">?</span></div><div class="bc-checks" id="afCourse"><label><input type="checkbox" value="juku" onchange="renderAccList()">クロフネ</label><label><input type="checkbox" value="ca" onchange="renderAccList()">CA</label></div></div>
+      <div class="filter-expr" id="accFilterExpr" style="display:none;"></div>
       <div class="bc-group"><div class="bc-glabel">教室</div><div class="bc-checks" id="afRoom"><label><input type="checkbox" value="北久里浜教室" onchange="renderAccList()">北久里浜</label><label><input type="checkbox" value="京急久里浜駅前教室" onchange="renderAccList()">京急久里浜駅前</label></div></div>
       <div class="bc-group"><div class="bc-glabel">学年</div><div class="bc-checks" id="afGrade"><label><input type="checkbox" value="小学1年生" onchange="renderAccList()">小1</label><label><input type="checkbox" value="小学2年生" onchange="renderAccList()">小2</label><label><input type="checkbox" value="小学3年生" onchange="renderAccList()">小3</label><label><input type="checkbox" value="小学4年生" onchange="renderAccList()">小4</label><label><input type="checkbox" value="小学5年生" onchange="renderAccList()">小5</label><label><input type="checkbox" value="小学6年生" onchange="renderAccList()">小6</label><label><input type="checkbox" value="中学1年生" onchange="renderAccList()">中1</label><label><input type="checkbox" value="中学2年生" onchange="renderAccList()">中2</label><label><input type="checkbox" value="中学3年生" onchange="renderAccList()">中3</label><label><input type="checkbox" value="高校1年生" onchange="renderAccList()">高1</label><label><input type="checkbox" value="高校2年生" onchange="renderAccList()">高2</label><label><input type="checkbox" value="高校3年生" onchange="renderAccList()">高3</label></div></div>
       <div style="text-align:right;"><button class="btn gray small" onclick="clearAccFilters()">絞り込みをクリア</button></div>
@@ -369,14 +382,16 @@ header .sub { font-size: 12px; opacity: 0.85; }
       <!-- 左2/3：絞り込み -->
       <div class="cast2-left">
         <div class="bc-glabel">🔍 絞り込み（映る人を絞るだけ・選択は消えません）</div>
+        <div class="filter-note"><i>ℹ</i> ちがう項目どうしは<b>すべて満たす人</b>／同じ項目の中は<b>どれか</b></div>
         <div class="bc2-filters">
           <div class="bc-group"><div class="bc-glabel">種別</div><div class="bc-checks" id="bcKind"><label><input type="checkbox" value="保護者" onchange="renderBcFilter()">保護者</label><label><input type="checkbox" value="生徒" onchange="renderBcFilter()">生徒</label></div></div>
           <div class="bc-group"><div class="bc-glabel">状態<span class="help-chip" data-tip="紐づけ済み＝会員管理ステータスが正。未紐づけ＝見込み客。普段は在籍だけONでOK。">?</span></div><div class="bc-checks" id="bcStatus"><label><input type="checkbox" value="在籍" checked onchange="renderBcFilter()">在籍</label><label><input type="checkbox" value="休会" onchange="renderBcFilter()">休会</label><label><input type="checkbox" value="退会" onchange="renderBcFilter()">退会（過去生）</label><label><input type="checkbox" value="見込み客" onchange="renderBcFilter()">見込み客</label></div></div>
-          <div class="bc-group"><div class="bc-glabel">コース<span class="help-chip" data-tip="チェックなし＝全員。クロフネだけ／CAだけにチェックでその所属の人。両方チェックすると『クロフネとCAの両方に通う人』だけが対象になります（クロフネだけに連絡したいなら『クロフネ』だけチェック。※両方通いの子は外れます）。塾/CAは紐づけ済みの会員だけが対象です。">?</span></div><div class="bc-checks" id="bcCourse"><label><input type="checkbox" value="juku" onchange="renderBcFilter()">クロフネ</label><label><input type="checkbox" value="ca" onchange="renderBcFilter()">CA</label></div></div>
+          <div class="bc-group"><div class="bc-glabel">コース<span class="filter-tag-and">両方=両方通い</span><span class="help-chip" data-tip="チェックなし＝全員。クロフネだけ／CAだけにチェックでその所属の人。両方チェックすると『クロフネとCAの両方に通う人』だけが対象になります（クロフネだけに連絡したいなら『クロフネ』だけチェック。※両方通いの子は外れます）。塾/CAは紐づけ済みの会員だけが対象です。">?</span></div><div class="bc-checks" id="bcCourse"><label><input type="checkbox" value="juku" onchange="renderBcFilter()">クロフネ</label><label><input type="checkbox" value="ca" onchange="renderBcFilter()">CA</label></div></div>
           <div class="bc-group"><div class="bc-glabel">教室</div><div class="bc-checks" id="bcRoom"><label><input type="checkbox" value="北久里浜教室" onchange="renderBcFilter()">北久里浜</label><label><input type="checkbox" value="京急久里浜駅前教室" onchange="renderBcFilter()">京急久里浜駅前</label></div></div>
           <div class="bc-group"><div class="bc-glabel">学年</div><div class="bc-checks" id="bcGrade"><label><input type="checkbox" value="小学1年生" onchange="renderBcFilter()">小1</label><label><input type="checkbox" value="小学2年生" onchange="renderBcFilter()">小2</label><label><input type="checkbox" value="小学3年生" onchange="renderBcFilter()">小3</label><label><input type="checkbox" value="小学4年生" onchange="renderBcFilter()">小4</label><label><input type="checkbox" value="小学5年生" onchange="renderBcFilter()">小5</label><label><input type="checkbox" value="小学6年生" onchange="renderBcFilter()">小6</label><label><input type="checkbox" value="中学1年生" onchange="renderBcFilter()">中1</label><label><input type="checkbox" value="中学2年生" onchange="renderBcFilter()">中2</label><label><input type="checkbox" value="中学3年生" onchange="renderBcFilter()">中3</label><label><input type="checkbox" value="高校1年生" onchange="renderBcFilter()">高1</label><label><input type="checkbox" value="高校2年生" onchange="renderBcFilter()">高2</label><label><input type="checkbox" value="高校3年生" onchange="renderBcFilter()">高3</label></div></div>
           <div class="bc-group"><div class="bc-glabel">受講オプション<span class="help-chip" data-tip="紐づけ済みの会員だけが対象です。">?</span></div><div class="bc-checks" id="bcOption"><label><input type="checkbox" value="eiken" onchange="renderBcFilter()">英検対策</label><label><input type="checkbox" value="juken" onchange="renderBcFilter()">受験特訓</label></div></div>
         </div>
+        <div class="filter-expr" id="bcFilterExpr" style="display:none;"></div>
         <div class="bc2-resulthead">
           <span class="bc2-resultcount" id="bcResultCount">絞り込み結果 0名</span>
           <button class="btn gray small" onclick="bcAddAllShown()">☑ 表示中を全て選択に追加</button>
@@ -688,6 +703,14 @@ function renderAccList(){
   $('accCntPast').textContent     = cntPast;
   var noLine = noLineMembers_();
   if($('accCntNoline')) $('accCntNoline').textContent = noLine.length;
+  // D案：選択条件の式を表示（アカウント管理。種別・オプションは絞り込みに無い）
+  var exprA = filterExprHtml_([
+    {label:'状態', vals:checkedVals('afStatus')},
+    {label:'学年', vals:shortGrades_(checkedVals('afGrade'))},
+    {label:'教室', vals:shortRooms_(checkedVals('afRoom'))},
+    {label:'コース', vals:courseLabels_(checkedVals('afCourse')), and:true}
+  ]);
+  var exprElA=$('accFilterExpr'); if(exprElA){ exprElA.innerHTML=exprA; exprElA.style.display=exprA?'block':'none'; }
 
   // LINE未登録タブ：会員管理にいてLINE紐づけが無い会員を表示（友だちベースではない）
   if (STATE.accTab==='noline'){
@@ -1324,6 +1347,29 @@ function switchTab(t){
 }
 function checkedVals(id){ return Array.prototype.slice.call(document.querySelectorAll('#'+id+' input[type=checkbox]:checked')).map(function(c){return c.value;}); }
 
+// D案(2026-06-30)：選んだ条件を「在籍 かつ 中2/中3」の式で表示する。
+// groups=[{label, vals[], and(bool)}] 同カテゴリ内はOR("/")、カテゴリ間はAND("かつ")。and:true は同カテゴリ内もAND(コース)。
+function filterExprHtml_(groups){
+  var parts=[];
+  groups.forEach(function(g){
+    if(!g.vals.length) return;
+    var sep = g.and ? '＋' : ' / ';
+    var inner = g.vals.map(function(v){ return '<span class="fx-chip">'+esc(v)+'</span>'; }).join('<span class="fx-or">'+sep+'</span>');
+    parts.push(inner);
+  });
+  if(!parts.length) return '';
+  return '<span class="fx-label">対象：</span>' + parts.join('<span class="fx-and">かつ</span>');
+}
+
+// 学年フルネーム配列→短縮表示（中学2年生→中2）
+function shortGrades_(arr){ return arr.map(function(g){ return normGrade_(g); }); }
+// 教室フルネーム配列→短縮
+function shortRooms_(arr){ return arr.map(function(r){ return shortRoom_(r); }); }
+// コース値→表示名
+function courseLabels_(arr){ return arr.map(function(c){ return c==='juku'?'クロフネ':(c==='ca'?'CA':c); }); }
+// オプション値→表示名
+function optionLabels_(arr){ return arr.map(function(o){ return o==='eiken'?'英検対策':(o==='juken'?'受験特訓':o); }); }
+
 /* ===== 一斉配信 刷新ロジック（2026-06-29）絞り込み（表示）と選択（送信対象）を分離 ===== */
 // STATE.bcSel = { userId: {manual:bool} } 選択中（送信対象）。フィルタを変えても保持。
 function bcEnsureState_(){ if(!STATE.bcSel) STATE.bcSel = {}; }
@@ -1399,6 +1445,17 @@ function renderBcFilter(){
   bcEnsureState_();
   var el = $('bcResultList'); if(!el) return;
   if (!STATE.loaded){ el.innerHTML='<div class="empty" style="padding:14px;">会員データを読み込み中…</div>'; if($('bcResultCount'))$('bcResultCount').textContent='絞り込み結果 …'; var p=$('bcNoLinePanel'); if(p)p.style.display='none'; return; }
+  // D案：選択条件の式を表示（一斉配信）
+  var c0 = bcFilterCond();
+  var exprB = filterExprHtml_([
+    {label:'種別', vals:c0.kinds},
+    {label:'状態', vals:c0.statuses},
+    {label:'学年', vals:shortGrades_(c0.grades)},
+    {label:'教室', vals:shortRooms_(c0.rooms)},
+    {label:'コース', vals:courseLabels_(c0.courses||[]), and:true},
+    {label:'オプション', vals:optionLabels_(c0.options)}
+  ]);
+  var exprElB=$('bcFilterExpr'); if(exprElB){ exprElB.innerHTML=exprB; exprElB.style.display=exprB?'block':'none'; }
   var list = bcFilteredFriends();
   $('bcResultCount').textContent = '絞り込み結果 '+list.length+'名';
   if(!list.length){ el.innerHTML = '<div class="empty" style="padding:14px;">条件に合う友だちがいません</div>'; return; }
