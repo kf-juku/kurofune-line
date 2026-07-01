@@ -548,9 +548,6 @@ function loadAll(){
 function selectedFriend(){
   return STATE.friends.filter(function(f){ return f.userId === STATE.selectedUserId; })[0] || null;
 }
-// 旧UI（renderFriends_OLD_unused）からのみ参照される空スタブ。新UIでは未使用だが未定義参照をなくすため残す。
-// TODO(次回・bash復旧後にcheck_html検証してから)：旧未使用関数 renderFriends_OLD_unused / renderMembers_OLD_unused / tagEditorHtml_ / updateMemberHeading / gradeToShort_ / このスタブ をまとめて削除する。
-function selectFriend(){ /* no-op（旧UI互換） */ }
 
 function memberById_(id){
   if (!id) return null;
@@ -1045,103 +1042,7 @@ function renderLinkPicker_(userId){
   }).join('');
 }
 
-function renderFriends_OLD_unused(){
-  var el = $('friendList');
-  $('friendCount').textContent = STATE.friends.length;
-  if (!STATE.friends.length) { el.innerHTML = '<div class="empty">友だちがいません</div>'; return; }
-  var sorted = STATE.friends.slice().sort(function(a,b){ return (a.studentId?1:0) - (b.studentId?1:0); });
-  el.innerHTML = sorted.map(function(fr){
-    var linked = !!fr.studentId;
-    var sel = STATE.selectedUserId===fr.userId;
-    var cls = 'card clickable ' + (linked ? 'linked' : 'unlinked') + (sel ? ' selected' : '');
-    var kindBadge = fr.kind ? '<span class="badge kind">'+esc(fr.kind)+'</span>' : '';
-    var sendTip = 'これは「遅刻などの自動通知」を送ってよいかの許可です。一斉配信とは別で、一斉配信はこの設定に関係なく届きます。';
-    var onBadge = (fr.sendOn ? '<span class="badge on">自動通知ON' : '<span class="badge off">自動通知OFF') + '<span class="help-chip" data-tip="'+sendTip+'">?</span></span>';
-    var mem = linked ? memberById_(fr.studentId) : null;
-    var busy = (STATE._busy === fr.userId);
 
-    // カード名＋出どころタグ：紐づけ済みは会員名(+会員タグ)、未紐づけはLINE名(+LINE名タグ)。
-    var titleName, srcTag, linkBadge;
-    if (linked && mem) {
-      titleName = esc(mem.name||'(会員名なし)');
-      srcTag = '<span class="src-tag src-mem">会員</span>';
-      linkBadge = '<span class="badge on">紐づけ済</span>';
-    } else if (linked) {
-      titleName = esc(fr.name||'(表示名なし)');
-      srcTag = '<span class="src-tag src-line">LINE名</span>';
-      linkBadge = '<span class="badge" style="background:#FCEBEB;color:#A32D2D;">会員情報なし('+esc(fr.studentId)+')</span>';
-    } else {
-      titleName = esc(fr.name||'(表示名なし)');
-      srcTag = '<span class="src-tag src-line">LINE名</span>';
-      linkBadge = '<span class="badge strong">未紐づけ</span>';
-    }
-
-    // 情報枠：紐づけ済み＝会員管理(緑)、未紐づけ＝本人入力(オレンジ)。
-    var infoBox = '';
-    if (linked && mem) {
-      var memPills = '';
-      if (mem.grade)     memPills += '<span class="src-pill src-mem">'+esc(mem.grade)+'</span>';
-      if (mem.classroom) memPills += '<span class="src-pill src-mem">'+esc(mem.classroom)+'</span>';
-      if (mem.status)    memPills += '<span class="src-pill src-mem">'+esc(mem.status)+'</span>';
-      infoBox = '<div class="info-box mem"><div class="info-box-head mem">🎓 会員管理の情報（正式）</div>'
-              + '<div style="display:flex;flex-wrap:wrap;gap:4px;">'+(memPills||'<span class="line-foot">情報なし</span>')+'</div></div>'
-              + '<div class="line-foot"><span class="src-tag src-line">LINE名: '+esc(fr.name||'')+'</span>　会員管理が正＝ここでは編集不可</div>';
-    } else if (!linked) {
-      var selfPills = '';
-      if (fr.inName) selfPills += '<span class="src-pill src-self">入力名 '+esc(fr.inName)+'</span>';
-      if (fr.kind)   selfPills += '<span class="src-pill src-self">'+esc(fr.kind)+'</span>';
-      if (fr.grade)  selfPills += '<span class="src-pill src-self">'+esc(fr.grade)+'</span>';
-      if (fr.course) selfPills += '<span class="src-pill src-self">'+esc(fr.course)+'</span>';
-      if (fr.room)   selfPills += '<span class="src-pill src-self">'+esc(fr.room)+'</span>';
-      if (fr.memo)   selfPills += '<span class="src-pill src-self">'+esc(fr.memo)+'</span>';
-      if (selfPills) {
-        infoBox = '<div class="info-box self"><div class="info-box-head self">✏️ 本人がアンケートで入力した内容</div>'
-                + '<div style="display:flex;flex-wrap:wrap;gap:4px;">'+selfPills+'</div></div>';
-      }
-    }
-
-    var actions = '<div class="card-actions">'
-      + (busy
-          ? '<button class="btn gray small" disabled style="opacity:.6">処理中…</button>'
-          : '<button class="btn gray small" onclick="event.stopPropagation();toggleSend(\''+esc(fr.userId)+'\','+(!fr.sendOn)+')">'
-            + (fr.sendOn?'送信OFFにする':'送信ONにする') + '</button>')
-      + (linked && !busy ? '<button class="btn gray small" onclick="event.stopPropagation();unlink(\''+esc(fr.userId)+'\')">紐づけ解除</button>' : '')
-      + '</div>';
-    // 未紐づけ（見込み客）はタグをインライン編集できる。紐づけ済みは会員管理が正＝編集不可。
-    var tagEditor = linked ? '' : tagEditorHtml_(fr);
-    return '<div class="'+cls+'" onclick="selectFriend(\''+esc(fr.userId)+'\')">'
-      + '<div class="card-top"><div class="card-title">'+titleName+' '+srcTag+'</div></div>'
-      + '<div class="card-meta">'+kindBadge+linkBadge+onBadge+'</div>'
-      + infoBox
-      + tagEditor
-      + actions
-      + '</div>';
-  }).join('');
-}
-
-// 未紐づけ友だちのタグ・インライン編集UI（見込み客のみ）。各selectを変えると即保存。
-// onclick/onchange に event.stopPropagation() を必ず付け、カード選択の暴発を防ぐ。
-function tagEditorHtml_(fr){
-  var uid = esc(fr.userId);
-  function sel_(field, label, opts, cur){
-    var o = '<option value="">'+label+'：未設定</option>';
-    opts.forEach(function(v){
-      o += '<option value="'+esc(v)+'"'+(String(cur)===v?' selected':'')+'>'+esc(v)+'</option>';
-    });
-    return '<select class="tag-sel" onclick="event.stopPropagation()" '
-         + 'onchange="event.stopPropagation();saveTag(\''+uid+'\',\''+field+'\',this.value)">'+o+'</select>';
-  }
-  var gradeOpts = gradeOptsForLevel_(fr.level);
-  return '<div class="tag-edit" onclick="event.stopPropagation()">'
-    + '<div class="tag-edit-label">タグ編集（見込み客）</div>'
-    + sel_('kind','種別',['保護者','生徒'],fr.kind)
-    + sel_('enroll','入会',['入会している','入会していない'],fr.memo)
-    + sel_('level','区分',['小学生','中学生','高校生'],fr.level)
-    + sel_('grade','学年',gradeOpts,fr.grade)
-    + sel_('course','コース',['進学塾クロフネ','コードアドベンチャー','両方'],fr.course)
-    + sel_('room','教室',['北久里浜教室','京急久里浜駅前教室'],fr.room)
-    + '</div>';
-}
 
 // 学校区分に応じた学年フルネーム選択肢（編集UI用・保存値もフルネーム）。
 function gradeOptsForLevel_(level){
@@ -1179,7 +1080,6 @@ function normGrade_(g){
   g = g.replace('小学','小').replace('中学','中').replace('高校','高').replace('年生','').replace('年','');
   return g;
 }
-function gradeToShort_(full){ return normGrade_(full); }
 
 // 照合スコア：漢字一致>読み一致>部分一致
 function matchScore(member, q){
@@ -1226,62 +1126,6 @@ function friendCandidates_(fr, limit){
   return limit ? scored.slice(0, limit) : scored;
 }
 
-function renderMembers_OLD_unused(){
-  var el = $('memberList');
-  $('memberCount').textContent = STATE.members.length;
-  if (!STATE.members.length) { el.innerHTML = '<div class="empty">生徒がいません</div>'; return; }
-
-  var fr = selectedFriend();
-  var manualQ = ($('memberSearch').value||'').trim();
-  // 友だち未選択かつ検索も空 → 誘導を表示
-  if (!fr && !manualQ) {
-    el.innerHTML = '<div class="empty" style="border:1.5px dashed var(--border);border-radius:8px;padding:24px;">'
-      + '← 左の友だちをクリックすると<br>候補の生徒がここに出ます</div>';
-    updateMemberHeading(null, null);
-    return;
-  }
-  // 検索欄が空かつ友だち選択中ならLINE表示名/入力名で絞り込み。検索入力があればそれを優先。
-  var q = manualQ || (fr ? (fr.inName || fr.name || '') : '');
-  updateMemberHeading(fr, manualQ);
-
-  var gradeF = ($('gradeFilter') ? $('gradeFilter').value : '') || '';
-  var base = STATE.members;
-  if (gradeF) {
-    var gShort = gradeToShort_(gradeF); // 例 '中学2年生'→'中2'
-    base = base.filter(function(m){ return normGrade_(m.grade) === gShort; });
-  }
-  var list = base.map(function(m){ return { m:m, score: matchScore(m, q) }; });
-  if (q) {
-    list = list.filter(function(x){ return x.score > 0; })
-               .sort(function(a,b){ return b.score - a.score; });
-  } else {
-    list = list.map(function(x){ return x; }); // 全件
-  }
-
-  if (!list.length) {
-    el.innerHTML = '<div class="empty">「'+esc(q)+'」に一致する生徒がいません。<br>検索欄で名前を打ち直してください。</div>';
-    return;
-  }
-
-  el.innerHTML = list.map(function(x){
-    var m = x.m;
-    var strong = x.score >= 90 ? '<span class="badge strong">有力候補</span>' : '';
-    var canLink = !!fr;
-    var linkBtn = canLink
-      ? '<button class="btn green small" onclick="confirmLink(\''+esc(m.id)+'\',\''+esc(m.name)+'\')">この生徒に紐づける</button>'
-      : '<span class="badge">左の友だちを選んでください</span>';
-    return '<div class="card">'
-      + '<div class="card-top"><div class="card-title">'+esc(m.name||'')+'</div></div>'
-      + '<div class="card-meta">'
-      + '<span class="badge">'+esc(m.grade||'')+'</span>'
-      + '<span class="badge">'+esc(m.classroom||'')+'</span>'
-      + '<span class="badge">'+esc(m.status||'')+'</span>'
-      + strong
-      + '</div>'
-      + '<div class="card-actions">'+linkBtn+'</div>'
-      + '</div>';
-  }).join('');
-}
 
 // 紐づけ実行（A-②のアコーディオン内ボタン→生徒検索モーダルから呼ぶ）
 function confirmLink(userId, studentId, studentName){
@@ -1330,13 +1174,6 @@ function toggleSend(userId, on){
     .catch(function(e){ STATE._busy=null; renderAccList(); setStatus(''); alert('エラー: '+e.message); });
 }
 
-function updateMemberHeading(fr, manualQ){
-  var h = document.getElementById('memberHeading');
-  if (!h) return;
-  if (manualQ) { h.textContent = '「'+manualQ+'」の検索結果'; }
-  else if (fr) { h.textContent = '「'+(fr.inName||fr.name||'')+'」さんの候補'; }
-  else { h.textContent = '生徒マスタ（会員管理）'; }
-}
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 
@@ -1670,6 +1507,19 @@ function dupReserve(i){
   document.querySelectorAll('#bcMode input').forEach(function(r){ r.checked=(r.value==='reserve'); });
   updateModeUI();
   if(h.when){ document.getElementById('bcWhen').value = String(h.when).replace(' ','T').slice(0,16); }
+  // 宛先（選択中）も復元する(2026-07-01 川上さんOK)。予約は cond.userIds に宛先を持つ。
+  // dupCast と同じく、今も友だち一覧に存在する userId だけを選択中に戻す。
+  var restored=0, missing=0;
+  STATE.bcSel={};
+  bcEnsureState_();
+  var ids = (h.cond && h.cond.userIds) ? h.cond.userIds : [];
+  var have = {}; (STATE.friends||[]).forEach(function(f){ have[f.userId]=true; });
+  ids.forEach(function(uid){ if(have[uid]){ STATE.bcSel[uid]={manual:false}; restored++; } else { missing++; } });
+  renderBcFilter(); renderBcSelected();
+  var msg='予約を複製しました。宛先：'+restored+'名を選択中にしました。';
+  if(missing>0) msg+='（'+missing+'名は現在の友だち一覧に見つからず除外）';
+  if(ids.length===0) msg='予約を複製しました。この予約は宛先情報が無いため、宛先は左の絞り込みから選んでください。';
+  alert(msg);
   window.scrollTo(0,0);
 }
 // 配信履歴：最新3件だけ表示し、残りは折りたたみ（2026-06-29）。
